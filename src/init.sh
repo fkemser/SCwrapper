@@ -1,7 +1,7 @@
 #!/bin/sh
 #
-# SPDX-FileCopyrightText: Copyright (c) <ABOUT_YEARS> <ABOUT_AUTHORS>
-# SPDX-License-Identifier: <ABOUT_LICENSE>
+# SPDX-FileCopyrightText: Copyright (c) 2022-2024 Florian Kemser and the SCwrapper contributors
+# SPDX-License-Identifier: GPL-3.0-or-later
 #
 #===============================================================================
 #
@@ -61,7 +61,12 @@ readonly I_FILE_SH_INIT="${I_DIR_SRC}/init.sh"  # Initialization Script
 #                                     \|||/
 #                                      \|/
 #===============================================================================
-readonly I_FILE_SH_RUN="${I_DIR_SRC}/run.sh"
+readonly I_DIR_TEX="${I_DIR_ROOT:-.}/tex"
+
+readonly I_FILE_SH_CUPS="${I_DIR_SRC}/cups.sh"
+readonly I_FILE_SH_SC="${I_DIR_SRC}/sc.sh"
+readonly I_FILE_SH_TEX="${I_DIR_SRC}/tex.sh"
+readonly I_FILE_TEX_SC="${I_DIR_TEX}/sc.tex"
 #===============================================================================
 #                                      /|\
 #                                     /|||\

@@ -1,37 +1,35 @@
 #!/bin/sh
 #
-# SPDX-FileCopyrightText: Copyright (c) <ABOUT_YEARS> <ABOUT_AUTHORS>
-# SPDX-License-Identifier: <ABOUT_LICENSE>
+# SPDX-FileCopyrightText: Copyright (c) 2022-2024 Florian Kemser and the CUPSwrapper contributors
+# SPDX-License-Identifier: GPL-3.0-or-later
 #
 #===============================================================================
 #
-#         FILE:   /etc/run.cfg.sh
+#         FILE:   /etc/cups.cfg.sh
 #
 #        USAGE:   ---
 #                 (This is a configuration file, so please do NOT run it.)
 #
-#  DESCRIPTION:   Configuration File for </src/run.sh>
+#  DESCRIPTION:   Configuration File for </src/cups.sh>
 #
 #         BUGS:   ---
 #
 #        NOTES:   Please DO NOT DELETE this file, even when it is empty.
 #
-#        TODO:    See 'TODO:'-tagged lines below.
+#         TODO:   See 'TODO:'-tagged lines below.
 #===============================================================================
 
 #===============================================================================
-#                  TODO: DEFINE YOUR VARIABLES/CONSTANTS HERE
+#                  DONE: DEFINE YOUR VARIABLES/CONSTANTS HERE
 #
 #                                      |||
 #                                     \|||/
 #                                      \|/
 #===============================================================================
-#readonly CFG_RUN_CONSTANT1=""
-#readonly CFG_RUN_CONSTANT2=""
 #===============================================================================
 #                                      /|\
 #                                     /|||\
 #                                      |||
 #
-#                  TODO: DEFINE YOUR VARIABLES/CONSTANTS HERE
+#                  DONE: DEFINE YOUR VARIABLES/CONSTANTS HERE
 #===============================================================================

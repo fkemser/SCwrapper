@@ -1,0 +1,545 @@
+% SPDX-FileCopyrightText: Copyright (c) 2022-2024 Florian Kemser and the SCwrapper contributors
+% SPDX-License-Identifier: MIT
+%
+%===============================================================================
+%
+%         FILE:   /tex/sc.tex
+%
+%        USAGE:   ---
+%
+%  DESCRIPTION:   PIN/PUK Letter
+%
+% REQUIREMENTS:   See </README.md>
+%
+%         BUGS:   - A manual '\pagebreak' has to be set after each page,
+%                   otherwise the textwidth is not calculated correctly.
+%
+%        NOTES:   ---
+%
+%         TODO:   See 'TODO:'-tagged lines below.
+%===============================================================================
+%===============================================================================
+%  IMPORT
+%===============================================================================
+%  DO NOT EDIT - LOAD SCRLTTR2 - DO NOT EDIT
+\documentclass[version=last]{scrlttr2}
+%  DO NOT EDIT - LOAD SCRLTTR2 - DO NOT EDIT
+
+%-------------------------------------------------------------------------------
+%  Packages
+%-------------------------------------------------------------------------------
+%                    TODO: REPLACE 'ngerman' by your locale
+%
+%  For a full list of locales please have a look at:
+%    http://mirrors.ctan.org/macros/latex/required/babel/base/babel.pdf
+%
+%  At the moment, only `ngerman`, `english`, `USenglish`, and `UKenglish`
+%  (all case-sensitive) are supported.
+%
+%                                      |||
+%                                     \|||/
+%                                      \|/
+%-------------------------------------------------------------------------------
+\usepackage[ngerman]{babel} % Spelling / Hyphenation
+%-------------------------------------------------------------------------------
+%                                      /|\
+%                                     /|||\
+%                                      |||
+%
+%                    TODO: REPLACE 'ngerman' by your locale
+%-------------------------------------------------------------------------------
+\usepackage[skins]{tcolorbox}           % Color boxes
+\usepackage[letterspace=400]{microtype} % Letter Spacing
+
+%  DO NOT EDIT - LOAD LETTER TEMPLATE - DO NOT EDIT
+\LoadLetterOption{template}
+%  DO NOT EDIT - LOAD LETTER TEMPLATE - DO NOT EDIT
+
+%===============================================================================
+%  VARIABLES
+%===============================================================================
+%-------------------------------------------------------------------------------
+%  KOMA script variables (declaration)
+%-------------------------------------------------------------------------------
+%  Environment variables
+%  Recipient-related
+\newkomavar[]{recpaddr}         % Addressee (delivery address)
+\newkomavar[]{recpname}         % Addressee (title + name(s) + surname(s))
+\newkomavar[]{recprevpin}       % Addressee (revocation PIN)
+%  Token-related
+\newkomavar[]{file}             % File
+\newkomavar[]{filecontent}      % File Content
+\newkomavar[]{mgmtkey}          % Management Key (Yubico YubiKey only)
+\newkomavar[]{password}         % File Password
+\newkomavar[]{sopin}            % Security Officer PIN
+\newkomavar[]{sopuk}            % Security Officer PUK
+\newkomavar[]{token}            % Token Information
+\newkomavar[]{userpin}          % User PIN
+\newkomavar[]{userpuk}          % User PUK
+%  PKI-related
+\newkomavar[]{pkihotline}       % PKI (emergency) hotline
+\newkomavar[]{pkiweb}           % PKI website
+
+%  Text modules
+%  Paragraphs
+\newkomavar[]{txtpar1}          % Paragraph 1
+\newkomavar[]{txtpar2}          % Paragraph 2
+\newkomavar[]{txtpar3}          % Paragraph 3
+\newkomavar[]{txtpar4}          % Paragraph 4
+%  Environment variables (token-related)
+\newkomavar[]{txtfilecontent}   % Enumeration (File Content)
+\newkomavar[]{txtmgmtkey}       % Enumeration (Management Key (Yubico YubiKey only))
+\newkomavar[]{txtpassword}      % Enumeration (File Password)
+\newkomavar[]{txtsopin}         % Enumeration (SO PIN)
+\newkomavar[]{txtsopuk}         % Enumeration (SO PUK)
+\newkomavar[]{txtuserpin}       % Enumeration (User PIN)
+\newkomavar[]{txtuserpuk}       % Enumeration (User PUK)
+%  Environment variables (PKI-related)
+\newkomavar[]{txtpkihotline1}   % PKI (emergency) hotline #1
+\newkomavar[]{txtpkihotline2}   % PKI (emergency) hotline #2
+\newkomavar[]{txtpkiweb}        % PKI website
+
+%-------------------------------------------------------------------------------
+%  KOMA script variables (language-dependent description)
+%-------------------------------------------------------------------------------
+%  Default
+%  Recipient-related
+\setkomavar*{recpname}{Name}
+\setkomavar*{recprevpin}{Revocation PIN}
+%  Token-related
+\setkomavar*{file}{File}
+\setkomavar*{filecontent}{File Content}
+\setkomavar*{mgmtkey}{Mgmt Key}
+\setkomavar*{password}{File Password}
+\setkomavar*{sopin}{SO-PIN}
+\setkomavar*{sopuk}{SO-PUK}
+\setkomavar*{token}{Token}
+\setkomavar*{userpin}{User PIN}
+\setkomavar*{userpuk}{User PUK}
+%  PKI-related
+\setkomavar*{pkihotline}{In case of emergency}
+\setkomavar*{pkiweb}{More information}
+
+%  ngerman
+\IfLanguagePatterns{ngerman}{%
+  %  Recipient-related
+  \setkomavar*{recpname}{Name}
+  \setkomavar*{recprevpin}{Sperr-PIN}
+  %  Token-related
+  \setkomavar*{file}{Datei}
+  \setkomavar*{filecontent}{Dateiinhalt}
+  \setkomavar*{mgmtkey}{Mgmt-Key}
+  \setkomavar*{password}{Datei-Passwort}
+  \setkomavar*{sopin}{SO-PIN}
+  \setkomavar*{sopuk}{SO-PUK}
+  \setkomavar*{token}{Token}
+  \setkomavar*{userpin}{Benutzer-PIN}
+  \setkomavar*{userpuk}{Benutzer-PUK}
+  %  PKI-related
+  \setkomavar*{pkihotline}{Im Notfall}
+  \setkomavar*{pkiweb}{Weitere Informationen}
+}{}
+
+%-------------------------------------------------------------------------------
+%  KOMA script variables (language-dependent initialization)
+%-------------------------------------------------------------------------------
+%  Default
+%  Token-related
+\setkomavar{txtfilecontent}{%
+  the raw content of the file generated by the token%
+}
+\setkomavar{txtmgmtkey}{%
+  the management key for performing administrative tasks%
+}
+\setkomavar{txtpassword}{%
+  the password for the file generated by the token%
+}
+\setkomavar{txtsopin}{%
+  the security officer (SO)-PIN for performing administrative tasks%
+}
+\setkomavar{txtsopuk}{%
+  the security officer (SO)-PUK for performing administrative tasks%
+}
+\setkomavar{txtuserpin}{%
+  the user PIN for the daily use of your token%
+}
+\setkomavar{txtuserpuk}{%
+  the user PUK for unlocking your token and resetting your PIN in case you have entered a wrong PIN multiple times%
+}
+%  PKI-related
+\setkomavar{txtpkihotline1}{%
+  \textbf{In case of fraud, loss, or defect} please contact us immediately:%
+}
+\setkomavar{txtpkihotline2}{%
+  Please provide us the following details:%
+}
+\setkomavar{txtpkiweb}{%
+  \textbf{For further setup and usage instructions} please have a look at:%
+}
+%  Paragraphs
+\setkomavar{txtpar1}{%
+  With this letter we provide you important information on your security token:%
+}
+\setkomavar{txtpar2}{%
+  \textbf{Before continuing please check the letter's seal.} Was it already broken when the letter arrived? \textbf{If yes, then please contact us immediately and do not use your security token.}%
+}
+\setkomavar{txtpar3}{%
+  \textbf{Here is some advice regarding your token:}
+  \begin{itemize}[nosep]
+    \item Please keep this document at a safe place.
+    \item Please always keep your secrets separated from your token.
+    \item We recommend you to change your PIN before using the token. Please do not use any configurations that might be easily guessed, e.g. "123456" or your birthday.
+    \item Never share your secrets with anyone else, not even with us.
+  \end{itemize}
+}
+\setkomavar{txtpar4}{%
+  In case you have any questions or would like to give feedback please do not hesitate to contact us!%
+}
+
+%  ngerman
+\IfLanguagePatterns{ngerman}{%
+  %  Token-related
+  \setkomavar{txtfilecontent}{%
+    den Inhalt der vom Token erzeugten Datei%
+  }
+  \setkomavar{txtmgmtkey}{%
+    den Management Key für administrative Tätigkeiten%
+  }
+  \setkomavar{txtpassword}{%
+    das Passwort für die vom Token erzeugte Datei%
+  }
+  \setkomavar{txtsopin}{%
+    die Security Officer (SO)-PIN für administrative Tätigkeiten%
+  }
+  \setkomavar{txtsopuk}{%
+    die Security Officer (SO)-PUK für administrative Tätigkeiten%
+  }
+  \setkomavar{txtuserpin}{%
+    die Benutzer-PIN für die (tägliche) Nutzung%
+  }
+  \setkomavar{txtuserpuk}{%
+    die Benutzer-PUK zur Entsperrung Ihres Tokens, sollten Sie die PIN mehrmals hintereinander falsch eingegeben haben%
+  }
+  %  PKI-related
+  \setkomavar{txtpkihotline1}{%
+    \textbf{Bei Diebstahl, Verlust oder Defekt} bitten wir Sie uns umgehend zu informieren:%
+  }
+  \setkomavar{txtpkihotline2}{%
+    Bitte halten Sie folgende Daten bereit:%
+  }
+  \setkomavar{txtpkiweb}{%
+    \textbf{Weitere Informationen zur Einrichtung und Nutzung} finden Sie unter:%
+  }
+  %  Paragraphs
+  \setkomavar{txtpar1}{%
+    mit diesem Schreiben erhalten Sie folgende Informationen zu Ihrem Security-Token:%
+  }
+  \setkomavar{txtpar2}{%
+    \textbf{Bevor Sie fortfahren, prüfen Sie bitte das am Brief angebrachte Etikett.} War dieses bereits vor dem Öffnen beschädigt oder verformt? War in der roten Schutzfolie das Wort „VOID” lesbar? \textbf{Falls Sie eine dieser Unregelmäßigkeiten feststellen}, setzen Sie sich bitte umgehend mit uns in Verbindung und \textbf{nutzen Sie auf keinen Fall den Security-Token}.%
+  }
+  \setkomavar{txtpar3}{%
+    \textbf{Im Folgenden noch einige Hinweise} zur Nutzung:%
+    \begin{itemize}[nosep]
+      \item Bewahren Sie dieses Dokument bitte an einem sicheren Ort auf.
+      \item Bewahren Sie Ihre PIN/PUK niemals zusammen mit Ihrem Security-Token auf.
+      \item Aus Sicherheitsgründen empfehlen wir Ihnen, die PIN vor der erstmaligen Verwendung zu ändern. Verwenden Sie dabei bitte keine leicht zu erratenden Zahlenkombinationen, wie z.B. „123456” oder Ihr Geburtsdatum.
+      \item Teilen Sie Ihre PIN/PUK niemals Dritten mit, auch nicht uns.
+    \end{itemize}
+  }
+  \setkomavar{txtpar4}{%
+    Sollten Sie Fragen oder Anregungen haben, so können Sie uns jederzeit kontaktieren. Gerne sind wir für Sie da!%
+  }
+}
+
+%-------------------------------------------------------------------------------
+%  Environment (OS) variables
+%-------------------------------------------------------------------------------
+%  Recipient-related
+\getenv[\recpaddr]{arg_recp_addr}
+\getenv[\recpname]{arg_recp_name}
+\getenv[\recprevpin]{arg_all_recprevpin}
+
+%  Token-related
+\getenv[\file]{arg_all_file}
+\getenv[\filecontent]{all_file_content}
+\getenv[\mgmtkey]{arg_yubico_management_key}
+\getenv[\password]{arg_all_password}
+\getenv[\sopin]{arg_all_sopin}
+\getenv[\sopuk]{arg_all_sopuk}
+\getenv[\token]{arg_all_token}
+\getenv[\userpin]{arg_all_pin}
+\getenv[\userpuk]{arg_all_puk}
+
+%  PKI-related
+\getenv[\pkiweb]{arg_all_pki_web}
+\getenv[\pkihotline]{arg_all_pki_hotline}
+
+%-------------------------------------------------------------------------------
+%  Other
+%-------------------------------------------------------------------------------
+%  Length
+\newlength\tcboxtabwidth                    % 'tcolorbox' width
+
+%  Strings
+\newcommand{\tcboxFileTitle}{\file}         % file 'tcolorbox' title
+\newcommand{\tcboxTokenTitle}{Your token}   % token 'tcolorbox' title
+\IfLanguagePatterns{ngerman}{%
+  \renewcommand{\tcboxTokenTitle}{Ihr Token}%
+}
+
+%  'tcolorbox' horizontal lines
+\newcommand{\tcboxhlineFirstPre}{%
+  \expandafter\notblank\expandafter{\userpin}{\\ \hline \\}{\expandafter\notblank\expandafter{\userpuk}{\\ \hline \\}{\expandafter\notblank\expandafter{\sopin}{\\ \hline \\}{\expandafter\notblank\expandafter{\sopuk}{\\ \hline \\}{\expandafter\notblank\expandafter{\mgmtkey}{\\ \hline \\}{\relax}}}}}%
+}
+
+\newcommand{\tcboxhlineFirst}{%
+  \expandafter\notblank\expandafter{\token}{\tcboxhlineFirstPre}{}%
+}
+
+% \newcommand{\tcboxhlineSecondPre}{%
+%   \expandafter\notblank\expandafter{\token}{\\ \hline \\}{\expandafter\notblank\expandafter{\tcboxhlineFirstPre}{\\ \hline \\}{\relax}}%
+% }
+% \newcommand{\tcboxhlineSecond}{%
+%   \expandafter\notblank\expandafter{\file}{\tcboxhlineSecondPre}{\expandafter\notblank\expandafter{\password}{\tcboxhlineSecondPre}{\expandafter\notblank\expandafter{\filecontent}{\tcboxhlineSecondPre}{}}}%
+% }
+
+%  Shpw or hide 'tcolorbox'
+\newcommand{\tcboxTokenEnabled}{}
+\expandafter\notblank\expandafter{\userpin}{\renewcommand{\tcboxTokenEnabled}{true}}{\expandafter\notblank\expandafter{\userpuk}{\renewcommand{\tcboxTokenEnabled}{true}}{\expandafter\notblank\expandafter{\sopin}{\renewcommand{\tcboxTokenEnabled}{true}}{\expandafter\notblank\expandafter{\sopuk}{\renewcommand{\tcboxTokenEnabled}{true}}{\expandafter\notblank\expandafter{\mgmtkey}{\renewcommand{\tcboxTokenEnabled}{true}}{\expandafter\notblank\expandafter{\token}{\renewcommand{\tcboxTokenEnabled}{true}}{}}}}}}%
+
+\newcommand{\tcboxFileEnabled}{}
+\expandafter\notblank\expandafter{\password}{\renewcommand{\tcboxFileEnabled}{true}}{\expandafter\notblank\expandafter{\filecontent}{\renewcommand{\tcboxFileEnabled}{true}}{}}%
+
+%===============================================================================
+%  ADDRESSEE
+%===============================================================================
+%                DONE: PUT INFORMATION ABOUT YOUR RECIPIENT HERE
+%
+%                                      |||
+%                                     \|||/
+%                                      \|/
+%===============================================================================
+%-------------------------------------------------------------------------------
+%  Addressee-independent
+%-------------------------------------------------------------------------------
+%  Default
+%  Delivery Information
+\setkomavar{specialmail}{%
+\\
+\\
+Personal / Confidential%
+}
+%  Subject
+\setkomavar{subject}{Important information on your security token}
+%  Complimentary closing
+\setkomavar{closing}{Sincerely,}
+%  Signature (only uncomment if different from header.lco)
+%\setkomavar{signature}{Max Mustermann}
+%  Enclosure
+\setkomavar{encl}{%
+}
+%  CC
+\setkomavar{cc}{}
+
+%  ngerman
+\IfLanguagePatterns{ngerman}{%
+  %  Delivery Information
+  \setkomavar{specialmail}{%
+  \\
+  \\
+  Persönlich / Vertraulich%
+  }
+  %  Subject
+  \setkomavar{subject}{Wichtige Informationen zu Ihrem Security-Token}
+  %  Complimentary closing
+  \setkomavar{closing}{Mit freundlichen Grüßen}
+  %  Signature (only uncomment if different from header.lco)
+  %\setkomavar{signature}{Max Mustermann}
+  %  Enclosure
+  \setkomavar{encl}{%
+  }
+  %  CC
+  \setkomavar{cc}{}
+}
+
+%-------------------------------------------------------------------------------
+%  Addressee-specific
+%-------------------------------------------------------------------------------
+%  Default
+%  Full name
+\setkomavar{toname}{\recpname}
+%  Mail address
+\setkomavar{toaddress}{\recpaddr}
+%  Salutation
+\setkomavar{opening}{Dear \recpname}
+
+%  ngerman
+\IfLanguagePatterns{ngerman}{%
+  %  Salutation
+  \setkomavar{opening}{Sehr geehrte(r) \recpname,}
+}
+%===============================================================================
+%                                      /|\
+%                                     /|||\
+%                                      |||
+%
+%                DONE: PUT INFORMATION ABOUT YOUR RECIPIENT HERE
+%===============================================================================
+
+%===============================================================================
+%  BEGIN DOCUMENT
+%===============================================================================
+%-------------------------------------------------------------------------------
+%  DO NOT EDIT
+%-------------------------------------------------------------------------------
+\begin{document}
+  \begin{letter}{}
+
+  \opening{\usekomavar{opening}}
+%-------------------------------------------------------------------------------
+%  DO NOT EDIT
+%-------------------------------------------------------------------------------
+  %-----------------------------------------------------------------------------
+  %  BODY
+  %-----------------------------------------------------------------------------
+  %-----------------------------------------------------------------------------
+  %                         DONE: WRITE YOUR LETTER HERE
+  %
+  %                                     |||
+  %                                    \|||/
+  %                                     \|/
+  %-----------------------------------------------------------------------------
+  \usekomavar{txtpar1}
+
+  %-----------------------------------------------------------------------------
+  %  Enumerate what information this letter contents
+  %-----------------------------------------------------------------------------
+  %  At least one value must be set, otherwise this will produce an error
+  \begin{enumerate}[nosep, leftmargin=*]
+    \expandafter\notblank\expandafter{\userpin}{\item \usekomavar{txtuserpin}}{}%
+    \expandafter\notblank\expandafter{\userpuk}{\item \usekomavar{txtuserpuk}}{}%
+    \expandafter\notblank\expandafter{\sopin}{\item \usekomavar{txtsopin}}{}%
+    \expandafter\notblank\expandafter{\sopuk}{\item \usekomavar{txtsopuk}}{}%
+    \expandafter\notblank\expandafter{\mgmtkey}{\item \usekomavar{txtmgmtkey}}{}%
+    \expandafter\notblank\expandafter{\password}{\item \usekomavar{txtpassword}}{}%
+    \expandafter\notblank\expandafter{\filecontent}{\item \usekomavar{txtfilecontent}}{}%
+  \end{enumerate}
+
+  \usekomavar{txtpar2}
+
+  %-----------------------------------------------------------------------------
+  %  'tcolorbox' containing token-specific information
+  %-----------------------------------------------------------------------------
+  %  'textls' is responsible for letterspacing (better readability)
+  %  '\separatechars' needed to insert spaces between characters, otherwise
+  %    automatic linebreak would not work as it would be one "word"
+  \begin{center}
+    \expandafter\notblank\expandafter{\tcboxTokenEnabled}{%
+      \tcbox[enhanced,frame style image=blueshade.png,sharp corners=southwest,title=\tcboxTokenTitle]{%
+        \setlength{\tcboxtabwidth}{0.9\textwidth}%
+        \begin{tabularx}{\tcboxtabwidth}{r >{\bfseries}Z}%
+          %  User PIN
+          \expandafter\notblank\expandafter{\userpin}{\usekomavar*{userpin}: & \textls{\separatechars{\userpin}} \\}{}
+          %  User PUK
+          \expandafter\notblank\expandafter{\userpuk}{\usekomavar*{userpuk}: & \textls{\separatechars{\userpuk}} \\}{}
+          %  Security Officer PIN
+          \expandafter\notblank\expandafter{\sopin}{\usekomavar*{sopin}: & \textls{\separatechars{\sopin}} \\}{}
+          %  Security Officer PUK
+          \expandafter\notblank\expandafter{\sopuk}{\usekomavar*{sopuk}: & \textls{\separatechars{\sopuk}} \\}{}
+          %  Management Key (Yubico YubiKey only)
+          \expandafter\notblank\expandafter{\mgmtkey}{\usekomavar*{mgmtkey}: & \textls{\separatechars{\mgmtkey}} \\}{}
+          %  Horizontal Line
+          \tcboxhlineFirst
+          %  Token Information
+          \expandafter\notblank\expandafter{\token}{\usekomavar*{token}: & \token \\}{}
+          %
+          %  Horizontal Line
+          %\tcboxhlineSecond
+          %  File
+          %\expandafter\notblank\expandafter{\file}{\usekomavar*{file}: & \file \\}{}
+          %  File Password
+          %\expandafter\notblank\expandafter{\password}{\usekomavar*{password}: & \textls{\separatechars{\password}} \\}{}
+          %  File Content
+          %\expandafter\notblank\expandafter{\filecontent}{\usekomavar*{filecontent}: & \filecontent \\}{}
+        \end{tabularx}%
+      }
+    }{}
+
+    \expandafter\notblank\expandafter{\tcboxFileEnabled}{%
+      %\tcbox[enhanced,frame style image=blueshade.png,sharp corners=southwest,title=\tcboxtitle,width=0.9\textwidth,tcbox width=auto limited]{%
+      \tcbox[enhanced,frame style image=blueshade.png,sharp corners=southwest,title=\tcboxFileTitle,tcbox width=auto limited]{%
+        \setlength{\tcboxtabwidth}{0.9\textwidth}%
+        \begin{tabularx}{\tcboxtabwidth}{r >{\bfseries}Z}%
+          %  File Password
+          \expandafter\notblank\expandafter{\password}{\usekomavar*{password}: & \textls{\separatechars{\password}} \\}{}
+          %  File Content
+          \expandafter\notblank\expandafter{\filecontent}{\multicolumn{2}{Z}{\textls{\separatechars{\filecontent}}}\\}{}
+        \end{tabularx}%
+      }
+    }{}
+  \end{center}
+
+  \pagebreak
+  %-----------------------------------------------------------------------------
+  %  Giving further user instructions
+  %-----------------------------------------------------------------------------
+  %  General advice
+  \usekomavar{txtpar3}
+
+  %  More information
+  \Ifkomavarempty{pkiweb}{}{%
+    \usekomavar{txtpkiweb}
+
+    \begin{center}
+      \tcbox[enhanced,frame style image=blueshade.png,sharp corners=southwest,title=\usekomavar*{pkiweb}]{%
+        \textbf{\usekomavar{pkiweb}}%
+      }
+    \end{center}
+  }
+
+  %  Hotline (fraud/loss/defect)
+  \Ifkomavarempty{pkihotline}{}{%
+    \usekomavar{txtpkiweb}
+
+    \begin{center}
+      \tcbox[enhanced,frame style image=blueshade.png,sharp corners=southwest,title=Im Notfall]{%
+      \begin{tabular}{r >{\bfseries}l}
+      \usekomavar*{pkihotline}: & \usekomavar{pkihotline} \\
+      \\
+      \hline \\
+      \multicolumn{2}{l}{\usekomavar{txtpar5}}\\
+      \\
+      \usekomavar*{recpname}: & \usekomavar{recpname} \\
+      \usekomavar*{recprevpin}: & \usekomavar{recprevpin} \\
+      \end{tabular}%
+      }
+    \end{center}
+  }
+
+  %  Closing
+  \usekomavar{txtpar4}
+  %-----------------------------------------------------------------------------
+  %                                     /|\
+  %                                    /|||\
+  %                                     |||
+  %
+  %                         DONE: WRITE YOUR LETTER HERE
+  %-----------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
+%  DO NOT EDIT
+%-------------------------------------------------------------------------------
+  \closing{\usekomavar{closing}}
+  \Ifkomavarempty{encl}{}{%
+    \encl{\usekomavar{encl}}%
+  }
+  \Ifkomavarempty{cc}{}{%
+    \cc{\usekomavar{cc}}%
+  }
+  \end{letter}
+\end{document}
+%-------------------------------------------------------------------------------
+%  DO NOT EDIT
+%-------------------------------------------------------------------------------
+%===============================================================================
+%  END DOCUMENT
+%===============================================================================

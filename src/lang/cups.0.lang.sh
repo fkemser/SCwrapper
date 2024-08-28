@@ -1,16 +1,16 @@
 #!/bin/sh
 #
-# SPDX-FileCopyrightText: Copyright (c) <ABOUT_YEARS> <ABOUT_AUTHORS>
-# SPDX-License-Identifier: <ABOUT_LICENSE>
+# SPDX-FileCopyrightText: Copyright (c) 2022-2024 Florian Kemser and the CUPSwrapper contributors
+# SPDX-License-Identifier: GPL-3.0-or-later
 #
 #===============================================================================
 #
-#         FILE:   /src/lang/run.0.lang.sh
+#         FILE:   /src/lang/cups.0.lang.sh
 #
 #        USAGE:   ---
 #                 (This is a constant file, so please do NOT run it.)
 #
-#  DESCRIPTION:   String Constants Files for '/src/run.sh'
+#  DESCRIPTION:   String Constants Files for '/src/cups.sh'
 #                 Used to generate help texts, interactive dialogues,
 #                 and other terminal/log messages.
 #
@@ -18,7 +18,7 @@
 #
 #        NOTES:   ---
 #
-#        TODO:    See 'TODO:'-tagged lines below.
+#         TODO:   See 'TODO:'-tagged lines below.
 #===============================================================================
 
 #===============================================================================
@@ -31,6 +31,14 @@
 #===============================================================================
 #  Language-independent constants, to be stored within THIS file
 #===============================================================================
+#-------------------------------------------------------------------------------
+#  Used in help, section "ABOUT" and welcome dialogue
+#-------------------------------------------------------------------------------
+#  Constant                       Description
+#  (Example)
+#  -----------------------------------------------------------------------------
+#  L_<S>_ABOUT_...                See 'ABOUT THIS REPOSITORY' section below.
+#
 #-------------------------------------------------------------------------------
 #  Used in help, section "SYNOPSIS"
 #-------------------------------------------------------------------------------
@@ -136,17 +144,56 @@
 #===============================================================================
 
 #===============================================================================
+#  ABOUT THIS REPOSITORY
+#===============================================================================
+#  Author name and mail address (multiple authors separated by newline)
+readonly L_CUPS_ABOUT_AUTHORS="Florian Kemser and the CUPSwrapper contributors"
+
+#  (Optional) Project description, should be a oneliner describing what the
+#  project does. Please start with a low letter and leave the terminating
+#  '.' out.
+readonly L_CUPS_ABOUT_DESCRIPTION="a collection of shell scripts to interactively print and manage printers for local usage"
+
+#  (Optional) Institution (multiple lines allowed)
+readonly L_CUPS_ABOUT_INSTITUTION=""
+
+#  (Optional) Project license (SPDX-License-Identifier)
+#
+#  For the full SPDX license list please have a look at
+#  'https://spdx.org/licenses/'. However, only some licenses
+#  are supported, see </lib/SHtemplateLIB/lib/licenses> folder.
+#
+#  If you are not sure which license to choose
+#  just have a look at e.g. 'https://choosealicense.com'.
+readonly L_CUPS_ABOUT_LICENSE="GPL-3.0-or-later"
+
+#  (Optional) ASCII logo to display when running the script in interactive ('dialog') mode
+readonly L_CUPS_ABOUT_LOGO=""
+
+#  Project title, e.g. 'My Project'
+readonly L_CUPS_ABOUT_PROJECT="CUPSwrapper"
+
+#  DO NOT EDIT
+readonly L_CUPS_ABOUT_RUN="./$(basename "$0")"
+
+#  (Optional) Release/Version number, e.g. '1.1.0'
+readonly L_CUPS_ABOUT_VERSION="1.0.0"
+
+#  (Optional) Project year(s), e.g. '2023', '2023-2024'
+readonly L_CUPS_ABOUT_YEARS="2022-2024"
+
+#===============================================================================
 #  PARAMETER (TEMPLATE) - DO NOT EDIT
 #===============================================================================
 #  Script actions <ARG_ACTION_...>
-readonly L_RUN_HLP_PAR_ARG_ACTION_HELP="${LIB_SHTPL_HLP_PAR_ARG_ACTION_HELP}"
-
-#  Script operation modes <ARG_MODE_...>
-readonly L_RUN_HLP_PAR_ARG_MODE_DAEMON="${LIB_SHTPL_HLP_PAR_ARG_MODE_DAEMON}"
-readonly L_RUN_HLP_PAR_ARG_MODE_INTERACTIVE_SUBMENU="${LIB_SHTPL_HLP_PAR_ARG_MODE_INTERACTIVE_SUBMENU}"
+readonly L_CUPS_HLP_PAR_ARG_ACTION_HELP="${LIB_SHTPL_HLP_PAR_ARG_ACTION_HELP}"
 
 #  Log destination <ARG_LOGDEST_...>
-readonly L_RUN_HLP_PAR_ARG_LOGDEST="${LIB_SHTPL_HLP_PAR_ARG_LOGDEST}"
+readonly L_CUPS_HLP_PAR_ARG_LOGDEST="${LIB_SHTPL_HLP_PAR_ARG_LOGDEST}"
+
+#  Script operation modes <ARG_MODE_...>
+readonly L_CUPS_HLP_PAR_ARG_MODE_DAEMON="${LIB_SHTPL_HLP_PAR_ARG_MODE_DAEMON}"
+readonly L_CUPS_HLP_PAR_ARG_MODE_INTERACTIVE_SUBMENU="${LIB_SHTPL_HLP_PAR_ARG_MODE_INTERACTIVE_SUBMENU}"
 
 #===============================================================================
 #  PARAMETER (CUSTOM)
@@ -154,28 +201,39 @@ readonly L_RUN_HLP_PAR_ARG_LOGDEST="${LIB_SHTPL_HLP_PAR_ARG_LOGDEST}"
 #-------------------------------------------------------------------------------
 #  Script actions <ARG_ACTION_...>
 #-------------------------------------------------------------------------------
-readonly L_RUN_HLP_PAR_ARG_ACTION_CUSTOM1="--custom1"
-readonly L_RUN_HLP_PAR_ARG_ACTION_CUSTOM2="--custom2"
-readonly L_RUN_HLP_PAR_ARG_ACTION_CUSTOM3="--custom3 <dir>"
-readonly L_RUN_HLP_PAR_ARG_ACTION_CUSTOM4="--custom4 <int> <str>"
-readonly L_RUN_HLP_PAR_ARG_ACTION_CUSTOM5="--custom5 [<file>]"
-readonly L_RUN_HLP_PAR_ARG_ACTION_CUSTOM6="--custom6"
+readonly L_CUPS_HLP_PAR_ARG_ACTION_JOBSETTINGS="--jobsettings"
+readonly L_CUPS_HLP_PAR_ARG_ACTION_PRINT="--print [<file>]"
 
 #-------------------------------------------------------------------------------
 #  Other parameters <arg_...>
 #-------------------------------------------------------------------------------
-readonly L_RUN_HLP_PAR_ARG_BOOL="-b|--bool"
-readonly L_RUN_HLP_PAR_ARG_DIR="-d|--dir <dir>"
-readonly L_RUN_HLP_PAR_ARG_FILE="-f|--file <file>"
-readonly L_RUN_HLP_PAR_ARG_INT="-i|--int <int>"
-readonly L_RUN_HLP_PAR_ARG_ITEM="-j|--item <item>"
-readonly L_RUN_HLP_PAR_ARG_PASSWORD="-p|--password <pwd>"
-readonly L_RUN_HLP_PAR_ARG_STR="-s|--str <string>"
+readonly L_CUPS_HLP_PAR_ARG_FILE="<file>"
 
 #-------------------------------------------------------------------------------
 #  Last argument (parameter), see also <args_read()> in '/src/run.sh'
 #-------------------------------------------------------------------------------
-readonly L_RUN_HLP_PAR_LASTARG="[<file>]"
+readonly L_CUPS_HLP_PAR_LASTARG="[${L_CUPS_HLP_PAR_ARG_FILE}]"
+
+#===============================================================================
+#  GLOBAL VARIABLES (CUSTOM)
+#===============================================================================
+#-------------------------------------------------------------------------------
+#  pr_devuri
+#-------------------------------------------------------------------------------
+readonly L_CUPS_DLG_TXT_PR_DEVURI_2="\
+(1) https://www.cups.org/doc/network.html#IPP
+(2) https://www.cups.org/doc/network.html#SOCKET
+(3) https://www.cups.org/doc/network.html#LPD
+(4) https://wiki.debian.org/CUPSPrintQueues#deviceuri
+(5) https://opensource.apple.com/source/cups/cups-86/doc/sdd.shtml
+(6) https://opensource.apple.com/source/cups/cups-86/doc/sdd.shtml"
+
+#-------------------------------------------------------------------------------
+#  pr_queue
+#-------------------------------------------------------------------------------
+readonly L_CUPS_DLG_TXT_PR_QUEUE_21="(parallel|serial|usb)://<...>"
+readonly L_CUPS_DLG_TXT_PR_QUEUE_22="ipps://<...>"
+readonly L_CUPS_DLG_TXT_PR_QUEUE_4="[a-zA-Z0-9_%-]"
 
 #===============================================================================
 #  HELP
@@ -183,10 +241,9 @@ readonly L_RUN_HLP_PAR_LASTARG="[<file>]"
 #-------------------------------------------------------------------------------
 #  EXAMPLES
 #-------------------------------------------------------------------------------
-readonly L_RUN_HLP_TXT_EXAMPLES_1="\
-> ${L_ABOUT_RUN} --custom1"
-readonly L_RUN_HLP_TXT_EXAMPLES_2="\
-> ${L_ABOUT_RUN} --custom2 --item item2"
+readonly L_CUPS_HLP_TXT_EXAMPLES_1="\
+> ${L_CUPS_ABOUT_RUN} --print letter.pdf     # Print a PDF file named 'letter.pdf'
+> echo Hello | ${L_CUPS_ABOUT_RUN} --print   # Print a command's output, here 'echo Hello'"
 
 #-------------------------------------------------------------------------------
 #  NOTES
@@ -195,18 +252,34 @@ readonly L_RUN_HLP_TXT_EXAMPLES_2="\
 #-------------------------------------------------------------------------------
 #  REFERENCES
 #-------------------------------------------------------------------------------
-readonly L_RUN_HLP_TXT_REFERENCES_1="https://www.example.com"
-readonly L_RUN_HLP_TXT_REFERENCES_2="https://www.example.org"
+readonly L_CUPS_HLP_TXT_REFERENCES_1="https://www.cups.org/doc/network.html"
+readonly L_CUPS_HLP_TXT_REFERENCES_2="https://wiki.debian.org/CUPSPrintQueues"
+readonly L_CUPS_HLP_TXT_REFERENCES_3="https://opensource.apple.com/source/cups/cups-86/doc/sdd.shtml"
 
 #-------------------------------------------------------------------------------
 #  REQUIREMENTS
 #-------------------------------------------------------------------------------
-readonly L_RUN_HLP_TXT_REQUIREMENTS_1_REQUIRED="\
-  General: (...)
-  Debian:  > sudo apt install (...)"
-readonly L_RUN_HLP_TXT_REQUIREMENTS_1_OPTIONAL="\
-  General: (...)
-  Debian:  > sudo apt install (...)"
+readonly L_CUPS_HLP_TXT_REQUIREMENTS_1_PACKAGES="\
+  General
+  Avahi mDNS/DNS-SD-Daemon, Common UNIX Printing System(tm)
+
+  Alpine
+  > echo \"https://dl-cdn.alpinelinux.org/alpine/v\$(cut -d'.' -f1,2 /etc/alpine-release)/community/\" \\
+    | sudo tee -a /etc/apk/repositories
+  > echo \"@testing http://dl-cdn.alpinelinux.org/alpine/edge/testing/\" | sudo tee -a /etc/apk/repositories
+  > sudo apk update
+  > sudo apk add avahi cups cups-filters cups-pdf@testing
+
+  Debian
+  > sudo apt install avahi-daemon cups"
+readonly L_CUPS_HLP_TXT_REQUIREMENTS_1_GROUP_MEMBERSHIP="\
+> sudo usermod -a -G lpadmin $(id -un)"
+readonly L_CUPS_HLP_TXT_REQUIREMENTS_1_PRINTERDRIVERS="\
+  Alpine
+  > sudo apk add gutenprint-cups@testing
+
+  Debian
+  > sudo apt install printer-driver-all"
 
 #-------------------------------------------------------------------------------
 #  TEXTS
@@ -215,9 +288,20 @@ readonly L_RUN_HLP_TXT_REQUIREMENTS_1_OPTIONAL="\
 #-------------------------------------------------------------------------------
 #  TL;DR
 #-------------------------------------------------------------------------------
-readonly L_RUN_HLP_TXT_TLDR_1_INSTALL="\
+readonly L_CUPS_HLP_TXT_TLDR_1_INSTALL="\
+Alpine
+> echo \"https://dl-cdn.alpinelinux.org/alpine/v\$(cut -d'.' -f1,2 /etc/alpine-release)/community/\" \\
+  | sudo tee -a /etc/apk/repositories
+> echo \"@testing http://dl-cdn.alpinelinux.org/alpine/edge/testing/\" | sudo tee -a /etc/apk/repositories
+> sudo apk update
+> sudo apk add avahi dialog cups cups-filters cups-pdf@testing gutenprint-cups@testing
+
 Debian
-> sudo apt install dialog (...)"
-readonly L_RUN_HLP_TXT_TLDR_1_KERNEL="... (Run 'uname -r')"
-readonly L_RUN_HLP_TXT_TLDR_1_OS="... (Run 'cat /etc/*release')"
-readonly L_RUN_HLP_TXT_TLDR_1_PACKAGES="Dialog (...), (...)"
+> sudo apt install avahi-daemon dialog cups printer-driver-all"
+readonly L_CUPS_HLP_TXT_TLDR_1_KERNEL="5.15.133.1-microsoft-standard-WSL2"
+readonly L_CUPS_HLP_TXT_TLDR_1_OS="Debian GNU/Linux 12 (bookworm)"
+readonly L_CUPS_HLP_TXT_TLDR_1_PACKAGES="\
+Avahi mDNS/DNS-SD-Daemon (0.8-10),
+            Dialog (1.3-20230209-1),
+            Common UNIX Printing System(tm) (2.4.2-3+deb12u5),
+            printer drivers metapackage (0.20210903)"
