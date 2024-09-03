@@ -389,9 +389,9 @@ readonly ARG_ALL_PUK_LEN_OPENSC_P15="8"           # Default length
 readonly ARG_ALL_PUK_LEN_MAX_OPENSC_P15="16"      # Maximum length
 readonly ARG_ALL_SOPUK_CHARS_ALLOWED_OPENSC_P15="[:digit:]" # Allowed characters (e.g. 'a-z0-9') or character class (e.g. '[:alnum:]')
 readonly ARG_ALL_SOPUK_CHARS_DEFAULT_OPENSC_P15="${ARG_ALL_SOPUK_CHARS_ALLOWED_OPENSC_P15}" # Default characters in case secret is randomly generated
-readonly ARG_ALL_SOPUK_LEN_MIN_OPENSC_P15="8"       # Minimum length
-readonly ARG_ALL_SOPUK_LEN_OPENSC_P15="8"           # Default length
-readonly ARG_ALL_SOPUK_LEN_MAX_OPENSC_P15="16"      # Maximum length
+readonly ARG_ALL_SOPUK_LEN_MIN_OPENSC_P15="8"     # Minimum length
+readonly ARG_ALL_SOPUK_LEN_OPENSC_P15="8"         # Default length
+readonly ARG_ALL_SOPUK_LEN_MAX_OPENSC_P15="16"    # Maximum length
 
 # Lists of available object classes and list types depending on requested action
 readonly ARG_ALL_TYPE_LIST_OPENSC_P15_DELETE="\
@@ -405,7 +405,8 @@ DATA PRIVKEY SECRKEY"
 
 # PKCS#15 profile name and options ('--profile' (pkcs15-init))
 ARG_OPENSC_P15_PROFILE_ONEPIN="pkcs15+onepin"
-arg_opensc_p15_profile="pkcs15"
+ARG_OPENSC_P15_PROFILE_DEFAULT_OPENSC_P15="pkcs15"
+arg_opensc_p15_profile="${ARG_OPENSC_P15_PROFILE_DEFAULT_OPENSC_P15}"
 
 #-------------------------------------------------------------------------------
 #  SmartCard-HSM / Nitrokey HSM 2
@@ -424,9 +425,9 @@ readonly ARG_ALL_PIN_LEN_SCHSM="6"            # Default length
 readonly ARG_ALL_PIN_LEN_MAX_SCHSM="15"       # Maximum length
 readonly ARG_ALL_SOPIN_CHARS_ALLOWED_SCHSM="[:xdigit:]" # Allowed characters (e.g. 'a-z0-9') or character class (e.g. '[:alnum:]')
 readonly ARG_ALL_SOPIN_CHARS_DEFAULT_SCHSM="[:digit:]"  # Default characters in case secret is randomly generated
-readonly ARG_ALL_SOPIN_LEN_MIN_SCHSM="16"       # Minimum length
-readonly ARG_ALL_SOPIN_LEN_SCHSM="16"           # Default length
-readonly ARG_ALL_SOPIN_LEN_MAX_SCHSM="16"       # Maximum length
+readonly ARG_ALL_SOPIN_LEN_MIN_SCHSM="16"     # Minimum length
+readonly ARG_ALL_SOPIN_LEN_SCHSM="16"         # Default length
+readonly ARG_ALL_SOPIN_LEN_MAX_SCHSM="16"     # Maximum length
 
 # Lists of available object classes and list types depending on requested action
 readonly ARG_ALL_TYPE_LIST_SCHSM_LIST="${ARG_ALL_TYPE_LIST_OPENSC_P11_LIST}"
@@ -761,11 +762,12 @@ ${LIST_ARG_CLEANUP_INTERACTIVE_ALL}"
 
 #  OpenSC (PKCS#15)
 readonly LIST_ARG_CLEANUP_INTERACTIVE_OPENSC_P15="\
-${LIST_ARG_CLEANUP_INTERACTIVE_ALL} arg_p15_id_auth"
+${LIST_ARG_CLEANUP_INTERACTIVE_ALL} arg_opensc_p15_profile arg_p15_id_auth"
 
 #  SmartCard-HSM / Nitrokey HSM 2
 readonly LIST_ARG_CLEANUP_INTERACTIVE_SCHSM="\
-${LIST_ARG_CLEANUP_INTERACTIVE_ALL} arg_schsm_pwd_shares_threshold arg_schsm_pwd_shares_total"
+${LIST_ARG_CLEANUP_INTERACTIVE_ALL} \
+arg_schsm_pwd_shares_threshold arg_schsm_pwd_shares_total"
 
 #  Yubico YubiKey PIV
 readonly LIST_ARG_CLEANUP_INTERACTIVE_YUBICO="\
@@ -1594,12 +1596,28 @@ args_check() {
 #
 #      GLOBALS:  arg_action  arg_logdest  arg_mode
 #
-#                arg_schsm_dkek_shares      arg_all_file             arg_all_get
-#                arg_p11_uri_filter       arg_all_id_object               arg_interactive
-#                arg_schsm_key_reference    arg_all_key_type         arg_all_label
-#                             arg_token_type
-#                arg_schsm_pwd_shares_threshold                  arg_schsm_pwd_shares_total
-#                arg_all_id_reader
+#                arg_all_data_application_name  arg_all_data_oid    arg_all_file
+#                arg_all_force        arg_all_format        arg_all_get
+#                arg_all_id_object    arg_all_id_reader     arg_all_key_type
+#                arg_all_label        arg_all_newpinpuk     arg_all_password
+#                arg_all_pin          arg_all_puk           arg_all_serial
+#                arg_all_sopin        arg_all_sopuk         arg_all_type
+#
+#                arg_opensc_p15_profile
+#
+#                arg_p11_uri_filter
+#
+#                arg_p15_id_aid                   arg_p15_id_auth
+#
+#                arg_piv_ber_tlv_tag              arg_piv_keyref
+#
+#                arg_schsm_dkek_shares            arg_schsm_key_reference
+#                arg_schsm_pwd_shares_threshold   arg_schsm_pwd_shares_total
+#
+#                arg_token_type
+#
+#                arg_yubico_management_key        arg_yubico_new_management_key
+#                arg_yubico_pin_policy            arg_yubico_touch_policy
 #
 # PARAMETER  1:  Should be "$@" to get all arguments passed
 #      OUTPUTS:  An error message to <stderr> and/or <syslog>
@@ -3523,7 +3541,8 @@ menu_arg_action() {
 
   local title
   local text
-  eval "title=\${L_SC_${ID_LANG}_DLG_TTL_ARG_ACTION}"
+  title="$(lib_core_str_to --const "L_SC_DLG_ITM_ARG_TOKEN_TYPE_${arg_token_type}")"
+  eval title=\"\${L_SC_${ID_LANG}_DLG_TTL_ARG_ACTION} \(\${${title}}\)\"
   eval "text=\${L_SC_${ID_LANG}_DLG_TXT_ARG_ACTION}"
   eval "item1=\${LIB_SHTPL_${ID_LANG}_DLG_ITM_ABOUT}"
   eval "item2=\${LIB_SHTPL_${ID_LANG}_DLG_ITM_HELP}"
@@ -3743,9 +3762,15 @@ menu_main() {
     if ${arg_all_random}; then
       menu_arg_all_print && \
       if ${arg_all_print}; then
-        if [ "${arg_action}" = "${ARG_ACTION_ALL_INITIALIZE}" ]; then
-          menu_arg_all_print_separately
-        fi && \
+        case "${all_secrets_arg_list_change}" in
+          *arg_all_sopin*|*arg_all_sopuk*|*arg_yubico_management_key*)
+            case "${all_secrets_arg_list_change}" in
+              *arg_all_pin*|*arg_all_puk*)
+                menu_arg_all_print_separately
+                ;;
+            esac
+            ;;
+        esac && \
         all_secrets_print
       fi
     fi                                                                    && \
@@ -3760,9 +3785,15 @@ menu_main() {
     if ! ${arg_all_random}; then
       menu_arg_all_print && \
       if ${arg_all_print}; then
-        if [ "${arg_action}" = "${ARG_ACTION_ALL_INITIALIZE}" ]; then
-          menu_arg_all_print_separately
-        fi && \
+        case "${all_secrets_arg_list_change}" in
+          *arg_all_sopin*|*arg_all_sopuk*|*arg_yubico_management_key*)
+            case "${all_secrets_arg_list_change}" in
+              *arg_all_pin*|*arg_all_puk*)
+                menu_arg_all_print_separately
+                ;;
+            esac
+            ;;
+        esac && \
         all_secrets_print
       fi
     fi

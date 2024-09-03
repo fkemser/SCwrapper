@@ -437,7 +437,7 @@ readonly L_SC_DE_HLP_REF_ARG_ALL_PIN_SOPIN="Die PIN bzw. SO-PIN kann mit '${L_SC
 #  arg_all_print
 #-------------------------------------------------------------------------------
 readonly L_SC_DE_DLG_TTL_ARG_ALL_PRINT_FILE="Dateiinhalt ausdrucken?"
-readonly L_SC_DE_DLG_TTL_ARG_ALL_PRINT_SECRETS="Geheimnummer(n) (PIN, PUK, Passwort, etc.) ausdrucken?"
+readonly L_SC_DE_DLG_TTL_ARG_ALL_PRINT_SECRETS="Geheimnummer(n) ausdrucken?"
 
 readonly L_SC_DE_DLG_TXT_ARG_ALL_PRINT_FILE="\
 Es wird empfohlen, den Dateiinhalt auszudrucken, für den Fall, dass die Datei beschädigt wird. Möchten Sie die Datei ausdrucken?

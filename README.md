@@ -91,6 +91,9 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
+<img src="res/screenshot2.png" alt="screenshot2" width="49%"/> <img src="res/screenshot3.png" alt="screenshot3" width="49%"/>  
+<img src="res/screenshot4.png" alt="screenshot4" width="49%"/> <img src="res/screenshot5.png" alt="screenshot5" width="49%"/>
+
 This project provides a shell script to
 
 - initialize a security token including setting secrets (PIN, PUK, etc.),
@@ -188,6 +191,9 @@ In case you run this script interactively your terminal window must have a size 
 ````
 
 ### PIN/PUK Letter (optional)
+
+<a href="res/letter.en.pdf"><img src="res/letter.en.png" alt="letter.en" width="49%"/></a> <a href="res/letter.de.pdf"><img src="res/letter.de.png" alt="letter.de" width="49%"/></a>
+
 This project provides a **LaTeX letter template** (`/tex/sc.tex`), a modified version of [GerLaTeXLetter](https://github.com/fkemser/GerLaTeXLetter).
 You can use this template for **priting token-related secrets like PIN, PUK, etc.**.
 
@@ -252,7 +258,11 @@ tlmgr install environ microtype pgf tcolorbox tikzfill trimspaces
 <!-- USAGE -->
 ## Usage (/src/sc.sh)
 
-To call the script interactively, run `/src/sc.sh` (without further arguments) from your terminal. To get help, run `/src/sc.sh -h`.  
+<img src="res/usage.gif" alt="usage" width="100%"/>
+
+To call the script **interactively**, run `/src/sc.sh` (without further arguments) from your terminal.
+
+For **script mode** run `/src/sc.sh` followed by a list of arguments `--arg1 [<val1>] --arg2 [<val2>] ...`. To get help, run `/src/sc.sh -h`.
 
 ```sh
 ================================================================================
@@ -1099,7 +1109,7 @@ ____________________ Import certificate / key / data object ____________________
 ***** Yubico YubiKey PIV ('-T yubico') *****
 ./sc.sh -T yubico   --import cert.pem   --type cert     --piv-slot 9A   --format pem
 ./sc.sh -T yubico   --import key.der    --type privkey  --piv-slot 9A   --format der
-./sc.sh -T yubico   --import data.file  --type data     --piv-id
+./sc.sh -T yubico   --import data.file  --type data     --piv-id 5FC108
 
 _______________________ Export certificate / data object _______________________
 

@@ -438,7 +438,7 @@ readonly L_SC_EN_HLP_REF_ARG_ALL_PIN_SOPIN="Use '${L_SC_HLP_PAR_ARG_ALL_PIN}' or
 #  arg_all_print
 #-------------------------------------------------------------------------------
 readonly L_SC_EN_DLG_TTL_ARG_ALL_PRINT_FILE="Print file?"
-readonly L_SC_EN_DLG_TTL_ARG_ALL_PRINT_SECRETS="Print secrets (PIN, PUK, password, etc.) ?"
+readonly L_SC_EN_DLG_TTL_ARG_ALL_PRINT_SECRETS="Print secrets?"
 
 readonly L_SC_EN_DLG_TXT_ARG_ALL_PRINT_FILE="\
 It is highly recommended to print the file's content in case the file gets corrupted. Would you like to print the file?"
