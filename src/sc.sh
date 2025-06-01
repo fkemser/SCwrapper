@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# SPDX-FileCopyrightText: Copyright (c) 2022-2024 Florian Kemser and the SCwrapper contributors
+# SPDX-FileCopyrightText: Copyright (c) 2022-2025 Florian Kemser and the SCwrapper contributors
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 #===============================================================================
@@ -96,7 +96,8 @@ readonly ARG_ACTION_ALL_KEYPAIRGEN="keypairgen"
 readonly ARG_ACTION_ALL_LIST="list"
 readonly ARG_ACTION_ALL_RESET_PIN="reset-pin"
 readonly ARG_ACTION_ALL_UNBLOCK_PIN="unblock-pin"
-readonly ARG_ACTION_LIST_ALL="ALL_CHANGE_PIN ALL_CHANGE_PUK ALL_CHANGE_SO_PIN ALL_DELETE ALL_EXPORT ALL_GET ALL_IMPORT ALL_INITIALIZE ALL_KEYPAIRGEN ALL_LIST ALL_RESET_PIN ALL_UNBLOCK_PIN"
+readonly ARG_ACTION_ALL_VERIFY="verify"
+readonly ARG_ACTION_LIST_ALL="ALL_CHANGE_PIN ALL_CHANGE_PUK ALL_CHANGE_SO_PIN ALL_DELETE ALL_EXPORT ALL_GET ALL_IMPORT ALL_INITIALIZE ALL_KEYPAIRGEN ALL_LIST ALL_RESET_PIN ALL_UNBLOCK_PIN ALL_VERIFY"
 
 #-------------------------------------------------------------------------------
 #  OpenSC (PKCS#15)
@@ -353,6 +354,14 @@ readonly ARG_ALL_TYPE_LIST_ALL_DELETE="CERT DATA PRIVKEY PUBKEY SECRKEY"
 readonly ARG_ALL_TYPE_LIST_ALL_EXPORT="CERT DATA PUBKEY"
 readonly ARG_ALL_TYPE_LIST_ALL_IMPORT="CERT DATA PRIVKEY PUBKEY SECRKEY"
 
+# Type of secret (PIN, PUK, etc.) to verify
+readonly ARG_ALL_VERIFY_PIN="pin"
+readonly ARG_ALL_VERIFY_PUK="puk"
+readonly ARG_ALL_VERIFY_SOPIN="so-pin"
+readonly ARG_ALL_VERIFY_SOPUK="so-puk"
+readonly ARG_ALL_VERIFY_LIST="PIN"
+arg_all_verify=""
+
 #-------------------------------------------------------------------------------
 #  OpenSC (PKCS#11)
 #-------------------------------------------------------------------------------
@@ -365,6 +374,9 @@ ${CFG_SC_ARG_ALL_KEY_TYPE_OPENSC_P11=:-rsa:2048}"
 
 # Lists of available object classes and list types depending on requested action
 readonly ARG_ALL_TYPE_LIST_OPENSC_P11_LIST="ALGORITHM OBJECT READER"
+
+# List of secrets (PIN, PUK, etc.) to verify
+readonly ARG_ALL_VERIFY_LIST_OPENSC_P11="PIN SOPIN"
 
 #-------------------------------------------------------------------------------
 #  OpenSC (PKCS#15)
@@ -403,6 +415,9 @@ ALGORITHM CERT DATA INFO OBJECT PRIVKEY PUBKEY READER SECRKEY P15_APPLICATION P1
 readonly ARG_ALL_TYPE_LIST_OPENSC_P15_LIST_PINREQUIRED="\
 DATA PRIVKEY SECRKEY"
 
+# List of secrets (PIN, PUK, etc.) to verify
+readonly ARG_ALL_VERIFY_LIST_OPENSC_P15="PIN PUK SOPIN SOPUK"
+
 # PKCS#15 profile name and options ('--profile' (pkcs15-init))
 ARG_OPENSC_P15_PROFILE_ONEPIN="pkcs15+onepin"
 ARG_OPENSC_P15_PROFILE_DEFAULT_OPENSC_P15="pkcs15"
@@ -431,6 +446,9 @@ readonly ARG_ALL_SOPIN_LEN_MAX_SCHSM="16"     # Maximum length
 
 # Lists of available object classes and list types depending on requested action
 readonly ARG_ALL_TYPE_LIST_SCHSM_LIST="${ARG_ALL_TYPE_LIST_OPENSC_P11_LIST}"
+
+# List of secrets (PIN, PUK, etc.) to verify
+readonly ARG_ALL_VERIFY_LIST_SCHSM="${ARG_ALL_VERIFY_LIST_OPENSC_P11}"
 
 # Number of DKEK shares ('--dkek-shares' (sc-hsm-tool))
 readonly ARG_SCHSM_DKEK_SHARES_MIN="0"
@@ -492,6 +510,9 @@ readonly ARG_YUBICO_MANAGEMENT_KEY_LEN_MIN_YUBICO="32"    # Minimum length
 readonly ARG_ALL_TYPE_LIST_YUBICO_DELETE="CERT"
 readonly ARG_ALL_TYPE_LIST_YUBICO_IMPORT="CERT DATA PRIVKEY"
 readonly ARG_ALL_TYPE_LIST_YUBICO_LIST="ALGORITHM DATA INFO READER"
+
+# List of secrets (PIN, PUK, etc.) to verify
+readonly ARG_ALL_VERIFY_LIST_YUBICO="${ARG_ALL_VERIFY_LIST_OPENSC_P11}"
 
 # '--management-key' (ykman piv ...)
 readonly ARG_YUBICO_MANAGEMENT_KEY_DEFAULT_YUBICO=""
@@ -645,7 +666,7 @@ ALL_CHANGE_PIN ALL_RESET_PIN ALL_CHANGE_SO_PIN"
 readonly ARG_ACTION_LIST_SCRIPT_OPENSC_P11="\
 HELP ALL_CHANGE_PIN ALL_CHANGE_SO_PIN ALL_CONNECT ALL_DELETE ALL_EXPORT \
 ALL_GET ALL_IMPORT ALL_INITIALIZE ALL_KEYPAIRGEN ALL_LIST P11_GET_URI \
-ALL_RESET_PIN"
+ALL_RESET_PIN ALL_VERIFY"
 
 #  OpenSC (PKCS#15)
 #  Interactive mode / Submenu mode
@@ -658,7 +679,7 @@ readonly ARG_ACTION_LIST_SCRIPT_OPENSC_P15="\
 HELP ALL_CHANGE_PIN ALL_CHANGE_PUK ALL_CHANGE_SO_PIN ALL_CONNECT ALL_DELETE \
 OPENSC_P15_ERASE_APPLICATION OPENSC_P15_ERASE_CARD ALL_EXPORT \
 OPENSC_P15_FINALIZE ALL_GET ALL_IMPORT ALL_INITIALIZE ALL_KEYPAIRGEN \
-ALL_LIST OPENSC_P15_STORE_PIN ALL_UNBLOCK_PIN"
+ALL_LIST OPENSC_P15_STORE_PIN ALL_UNBLOCK_PIN ALL_VERIFY"
 
 #  SmartCard-HSM / Nitrokey HSM 2
 #  Interactive mode / Submenu mode
@@ -671,7 +692,7 @@ readonly ARG_ACTION_LIST_SCRIPT_SCHSM="\
 HELP ALL_CHANGE_PIN ALL_CHANGE_SO_PIN ALL_CONNECT ALL_DELETE ALL_EXPORT \
 ALL_GET ALL_IMPORT ALL_INITIALIZE ALL_KEYPAIRGEN ALL_LIST P11_GET_URI \
 ALL_RESET_PIN SCHSM_BACKUP SCHSM_DKEK_SHARE_CREATE SCHSM_DKEK_SHARE_IMPORT \
-SCHSM_RESTORE"
+SCHSM_RESTORE ALL_VERIFY"
 
 #  Yubico YubiKey PIV
 #  Interactive mode / Submenu mode
@@ -682,7 +703,7 @@ ALL_CHANGE_PIN ALL_UNBLOCK_PIN ALL_CHANGE_PUK YUBICO_CHANGE_MANAGEMENT_KEY"
 readonly ARG_ACTION_LIST_SCRIPT_YUBICO="\
 HELP YUBICO_CHANGE_MANAGEMENT_KEY ALL_CHANGE_PIN ALL_CHANGE_PUK ALL_CONNECT \
 ALL_DELETE ALL_EXPORT ALL_GET ALL_IMPORT ALL_INITIALIZE ALL_KEYPAIRGEN \
-ALL_LIST P11_GET_URI ALL_UNBLOCK_PIN"
+ALL_LIST P11_GET_URI ALL_UNBLOCK_PIN ALL_VERIFY"
 #-------------------------------------------------------------------------------
 #                                      /|\
 #                                     /|||\
@@ -949,6 +970,7 @@ args_check() {
       #  Used by two or more token types
       #-------------------------------------------------------------------------
       ${ARG_ACTION_ALL_GET}) lib_shtpl_arg_is_set "arg_all_get";;
+      ${ARG_ACTION_ALL_VERIFY}) lib_shtpl_arg_is_set "arg_all_verify";;
 
       #-------------------------------------------------------------------------
       #  OpenSC (PKCS#11)
@@ -1497,6 +1519,24 @@ args_check() {
     lib_shtpl_arg_error "arg_all_type"
   fi                                                                        && \
 
+  #-----------------------------------------------------------------------------
+  #  arg_all_verify
+  #-----------------------------------------------------------------------------
+  if lib_core_is --not-empty "${arg_all_verify}"; then
+    # Get specific list
+    list="$(lib_core_str_to --const "ARG_ALL_VERIFY_LIST_${arg_token_type}")"
+    eval "list=\${${list}}"
+
+    # In case specific list does not exist
+    if lib_core_is --empty "${list}"; then
+      list="${ARG_ALL_VERIFY_LIST}"
+    fi
+
+    lib_core_list_contains_str_ptr \
+      "${arg_all_verify}" "${list}" " " "ARG_ALL_VERIFY_" || \
+    lib_shtpl_arg_error "arg_all_verify" "ARG_ACTION_ALL_VERIFY"
+  fi                                                                        && \
+
   #=============================================================================
   #  OpenSC (PKCS#15)
   #=============================================================================
@@ -1645,13 +1685,14 @@ args_read() {
       #  PARAMETER (TEMPLATE)
       #-------------------------------------------------------------------------
       #  Script actions <ARG_ACTION_...>
-      -h|--help) arg_action="${ARG_ACTION_HELP}"; break;;
+      -h|--help) arg_action="${ARG_ACTION_HELP}"; break ;;
 
       #  Script operation modes <ARG_MODE_...>
       --submenu)
         # Possibility to run a certain submenu interactively
         arg_mode="${ARG_MODE_INTERACTIVE_SUBMENU}"
-        arg_action="$2"; [ $# -ge 1 ] && { shift; }
+        arg_action="$2"
+        [ $# -ge 1 ] && { shift; }
         ;;
 
       #-------------------------------------------------------------------------
@@ -1738,6 +1779,10 @@ args_read() {
       --${ARG_ACTION_ALL_LIST})
         arg_action="${1#--}"
         arg_all_type="$2"; [ $# -ge 1 ] && { shift; }
+        ;;
+      --${ARG_ACTION_ALL_VERIFY})
+        arg_action="${1#--}"
+        arg_all_verify="$2"; [ $# -ge 1 ] && { shift; }
         ;;
 
       # Parameter
@@ -1993,7 +2038,6 @@ help_synopsis() {
   local synopsis_tldr   # TL;DR (short) version
   local synopsis        # SYNOPSIS (long) version
 
-
   #-----------------------------------------------------------------------------
   #                DONE: DEFINE YOUR SYNOPSIS (INTRO) TEXT HERE
   #
@@ -2239,7 +2283,22 @@ $(lib_shtpl_arg --list-des-def "arg_p11_uri_filter")" " " ""                    
     "$(lib_shtpl_arg --par "ARG_ACTION_ALL_RESET_PIN")"     "$(lib_shtpl_arg --des "ARG_ACTION_ALL_RESET_PIN")" " " ""      \
                                                                                                                             \
                                                                                                                             \
-    "$(lib_shtpl_arg --par "ARG_ACTION_ALL_UNBLOCK_PIN")"   "$(lib_shtpl_arg --des "ARG_ACTION_ALL_UNBLOCK_PIN")"
+    "$(lib_shtpl_arg --par "ARG_ACTION_ALL_UNBLOCK_PIN")"   "$(lib_shtpl_arg --des "ARG_ACTION_ALL_UNBLOCK_PIN")" " " ""    \
+                                                                                                                            \
+                                                                                                                            \
+    "$(lib_shtpl_arg --par "ARG_ACTION_ALL_VERIFY")"  "$(lib_shtpl_arg --des "ARG_ACTION_ALL_VERIFY")
+
+${L_SC_HLP_TXT_HEADER_OPENSC_P11}
+${L_SC_HLP_TXT_HEADER_SCHSM}
+${L_SC_HLP_TXT_HEADER_YUBICO}
+$(lib_shtpl_arg --des "ARG_ACTION_ALL_VERIFY_OPENSC_P11")
+
+<type>$(lib_shtpl_arg --list-ptr "arg_all_verify" "OPENSC_P11")
+
+${L_SC_HLP_TXT_HEADER_OPENSC_P15}
+$(lib_shtpl_arg --des "ARG_ACTION_ALL_VERIFY_OPENSC_P15")
+
+<type>$(lib_shtpl_arg --list-ptr "arg_all_verify" "OPENSC_P15")"
 
   #-----------------------------------------------------------------------------
   #  SYNOPSIS (ACTION) (OpenSC PKCS#15)
@@ -2642,7 +2701,7 @@ init_first() {
   #                                     |||
   #                                    \|||/
   #                                     \|/
-  #----------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
   #-----------------------------------------------------------------------------
   #                                     /|\
   #                                    /|||\
@@ -2675,9 +2734,9 @@ init_lang() {
   #                                     \|/
   #-----------------------------------------------------------------------------
   case "${ID_LANG}" in
-    ${LIB_C_ID_LANG_EN}) readonly ID_LANG="${LIB_C_ID_L_EN}";;
-    ${LIB_C_ID_LANG_DE}) readonly ID_LANG="${LIB_C_ID_L_DE}";;
-    *) readonly ID_LANG="${LIB_C_ID_L_EN}";;
+    ${LIB_C_ID_LANG_EN}) readonly ID_LANG="${LIB_C_ID_L_EN}" ;;
+    ${LIB_C_ID_LANG_DE}) readonly ID_LANG="${LIB_C_ID_L_DE}" ;;
+    *) readonly ID_LANG="${LIB_C_ID_L_EN}" ;;
   esac
   #-----------------------------------------------------------------------------
   #                                     /|\
@@ -2729,6 +2788,8 @@ init_lang() {
   eval "readonly TXT_INVALID_ARG_1=\${LIB_SHTPL_${ID_LANG}_TXT_INVALID_ARG_1}"
   eval "readonly TXT_INVALID_ARG_2=\${LIB_SHTPL_${ID_LANG}_TXT_INVALID_ARG_2}"
   eval "readonly TXT_PROCESSING=\${LIB_SHTPL_${ID_LANG}_TXT_PROCESSING}"
+  eval "readonly TXT_TRAP_MAIN_TERMINATED=\${LIB_SHTPL_${ID_LANG}_TXT_TRAP_MAIN_TERMINATED}"
+  eval "readonly TXT_TRAP_MAIN_TERMINATING=\${LIB_SHTPL_${ID_LANG}_TXT_TRAP_MAIN_TERMINATING}"
 }
 
 #===  FUNCTION  ================================================================
@@ -3068,9 +3129,9 @@ main() {
 
   # Run mode-specific subfunctions
   case "${arg_mode}" in
-    ${ARG_MODE_DAEMON}) main_daemon;;
-    ${ARG_MODE_INTERACTIVE}|${ARG_MODE_INTERACTIVE_SUBMENU}) main_interactive || return $?;;
-    ${ARG_MODE_SCRIPT}) main_script;;
+    ${ARG_MODE_DAEMON}) main_daemon ;;
+    ${ARG_MODE_INTERACTIVE}|${ARG_MODE_INTERACTIVE_SUBMENU}) main_interactive || return $? ;;
+    ${ARG_MODE_SCRIPT}) main_script ;;
   esac
 }
 
@@ -3191,7 +3252,7 @@ main_interactive() {
       #                                  \|||/
       #                                   \|/
       #-------------------------------------------------------------------------
-      ${ARG_ACTION_ABOUT}|${ARG_ACTION_HELP}|${ARG_ACTION_EXIT})
+      ${ARG_ACTION_ABOUT}|${ARG_ACTION_EXIT}|${ARG_ACTION_HELP})
         run || exitcode="$?"
         ;;
       #-------------------------------------------------------------------------
@@ -3252,9 +3313,9 @@ run() {
     #---------------------------------------------------------------------------
     #  TEMPLATE - DO NOT EDIT
     #---------------------------------------------------------------------------
-    ${ARG_ACTION_ABOUT})        lib_shtpl_about --dialog;;
-    ${ARG_ACTION_EXIT})         clear; exit;;
-    ${ARG_ACTION_HELP})         help;;
+    ${ARG_ACTION_ABOUT})        lib_shtpl_about --dialog ;;
+    ${ARG_ACTION_EXIT})         clear; exit ;;
+    ${ARG_ACTION_HELP})         help ;;
 
     #---------------------------------------------------------------------------
     #  CUSTOM
@@ -3287,6 +3348,7 @@ run() {
     ${ARG_ACTION_ALL_LIST})           all_list ;;
     ${ARG_ACTION_ALL_RESET_PIN})      all_reset_pin ;;
     ${ARG_ACTION_ALL_UNBLOCK_PIN})    all_unblock_pin ;;
+    ${ARG_ACTION_ALL_VERIFY})         all_verify ;;
 
     #---------------------------------------------------------------------------
     #  OpenSC (PKCS#11)
@@ -3401,7 +3463,7 @@ trap_main() {
   local pid
   pid="$(lib_os_ps_pidlock --getpid)" || \
   lib_os_ps_get_ownpid pid
-  info --syslog "Signal <${arg_signal}> received. Terminating (PID <${pid}>) ..."
+  eval info --syslog \"${TXT_TRAP_MAIN_TERMINATING}\"
 
   # Special Trap Handling
   case "${arg_mode}" in
@@ -3474,8 +3536,8 @@ trap_main() {
     # as they may run in background (asynchronously).
     local sub_signal
     case "${arg_signal}" in
-      INT|QUIT) sub_signal="TERM";;
-      *)        sub_signal="${arg_signal}";;
+      INT|QUIT) sub_signal="TERM" ;;
+      *)        sub_signal="${arg_signal}" ;;
     esac
 
     # Kill subshells / child processes
@@ -3501,17 +3563,17 @@ trap_main() {
   #  If PID lock is disabled ("PIDLOCK_ENABLED"="false"), then
   #  <lib_os_ps_pidlock()> will fail but without any consequences.
   lib_os_ps_pidlock --unlock
-  info --syslog "Script terminated (PID <${pid}>)."
+  eval info --syslog \"${TXT_TRAP_MAIN_TERMINATED}\"
 
   #  Exit - Depends on signal ...
   case "${arg_signal}" in
     EXIT)
       # ... EXIT
-      exit;;
+      exit ;;
     *)
       # ... other signals:
       # Clear EXIT trap handling, otherwise <trap_main()> would run again.
-      trap - EXIT; exit 1;;
+      trap - EXIT; exit 1 ;;
   esac
 }
 
@@ -3595,7 +3657,7 @@ menu_main() {
 
   #  Default actions do not depend on any further parameter
   case "${arg_action}" in
-    ${ARG_ACTION_ABOUT}|${ARG_ACTION_EXIT}|${ARG_ACTION_HELP}) return;;
+    ${ARG_ACTION_ABOUT}|${ARG_ACTION_EXIT}|${ARG_ACTION_HELP}) return ;;
   esac                                                                      && \
   #-----------------------------------------------------------------------------
   #                    DONE: DEFINE YOUR MENU HANDLING HERE
@@ -4838,6 +4900,23 @@ all_unblock_pin() {
 }
 
 #===  FUNCTION  ================================================================
+#         NAME:  all_verify
+#  DESCRIPTION:  Verify PIN, PUK, SO-PIN, ...
+#===============================================================================
+all_verify() {
+  local arg
+  
+  case "${arg_all_verify}" in
+    ${ARG_ALL_VERIFY_PIN})    arg="arg_all_pin" ;;
+    ${ARG_ALL_VERIFY_PUK})    arg="arg_all_puk" ;;
+    ${ARG_ALL_VERIFY_SOPIN})  arg="arg_all_sopin" ;;
+    ${ARG_ALL_VERIFY_SOPUK})  arg="arg_all_sopuk" ;;
+  esac
+
+  eval all_verify_pinpuk "${arg}" \"\${${arg}}\"
+}
+
+#===  FUNCTION  ================================================================
 #         NAME:  all_verify_pinpuk
 #  DESCRIPTION:  Verify PIN, PUK, SO-PIN, ...
 # PARAMETER  1:  Variable identifier, e.g. 'arg_all_pin'
@@ -4986,7 +5065,7 @@ menu_all_secrets() {
       chars="$(lib_core_str_to --const "${arg}_CHARS_ALLOWED_ALL")"
     fi
 
-    # Evaluate <chars> at is still a pointer
+    # Evaluate <chars> as it is still a pointer
     eval "chars=\${${chars}}"
 
     # <chars> can either be a character class ([:...:]) or still empty ("")

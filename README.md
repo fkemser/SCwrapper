@@ -53,7 +53,7 @@
 
 
 <!-- TABLE OF CONTENTS -->
-<details>
+<details open>
   <summary>Table of Contents</summary>
   <ol>
     <li>
@@ -65,19 +65,19 @@
       </ul>
     </li>
     <li>
-      <a href="#getting-started">Getting Started</a>
+      <a href="#getting-started"><b>Getting Started</b></a>
       <ul>
         <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#mandatory">Mandatory</a></li>
-        <li><a href="#interactive-mode-optional">Interactive Mode (optional)</a></li>
-        <li><a href="#pinpuk-letter-optional">PIN/PUK Letter (optional)</a></li>
+        <li><a href="#mandatory"><b>Mandatory</b></a></li>
+        <li><a href="#interactive-mode-optional"><b>Interactive Mode (optional)</b></a></li>
         <li><a href="#opensc-pkcs11-and-smartcard-hsm--nitrokey-hsm-2">OpenSC PKCS#11 and SmartCard-HSM / Nitrokey HSM 2</a></li>
         <li><a href="#opensc-pkcs15">OpenSC PKCS#15</a></li>
         <li><a href="#yubico-yubikey-piv">Yubico YubiKey PIV</a></li>
-        <li><a href="#installation">Installation</a></li>
+        <li><a href="#pinpuk-letter-optional">PIN/PUK Letter (optional)</a></li>
+        <li><a href="#installation"><b>Installation</b></a></li>
       </ul>
     </li>
-    <li><a href="#usage-srcscsh">Usage (/src/sc.sh)</a></li>
+    <li><a href="#usage-srcscsh"><b>Usage (/src/sc.sh)</b></a></li>
     <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
@@ -190,26 +190,6 @@ In case you run this script interactively your terminal window must have a size 
     Debian: > sudo apt install dialog
 ````
 
-### PIN/PUK Letter (optional)
-
-<a href="res/letter.en.pdf"><img src="res/letter.en.png" alt="letter.en" width="49%"/></a> <a href="res/letter.de.pdf"><img src="res/letter.de.png" alt="letter.de" width="49%"/></a>
-
-This project provides a **LaTeX letter template** (`/tex/sc.tex`), a modified version of [GerLaTeXLetter](https://github.com/fkemser/GerLaTeXLetter).
-You can use this template for **priting token-related secrets like PIN, PUK, etc.**.
-
-:warning: To use this feature **please follow all of the following setup instructions before continuing** :warning:
-  * [CUPSwrapper](https://github.com/fkemser/CUPSwrapper#prerequisites)
-  * [GerLaTeXLetter](https://github.com/fkemser/GerLaTeXLetter#prerequisites)
-  * [TeXLetterCreator](https://github.com/fkemser/TeXLetterCreator#prerequisites)
-
-Afterwards, please install some **additional but required CTAN packages**
-
-```sh
-tlmgr install environ microtype pgf tcolorbox tikzfill trimspaces
-```
-
-**To customize the template** please edit the files within the `/tex` folder. For more information please have a look at [GerLaTeXLetter](https://github.com/fkemser/GerLaTeXLetter#customization). The instructions for `letter.tex` also apply to `sc.tex`.
-
 ### OpenSC PKCS#11 and SmartCard-HSM / Nitrokey HSM 2
 ````
   Packages: GnuTLS, OpenSC, OpenSC (PKCS#11 module)
@@ -235,6 +215,26 @@ tlmgr install environ microtype pgf tcolorbox tikzfill trimspaces
   Packages: GnuTLS, Yubico PIV tool (PKCS#11 module), YubiKey Manager
     Debian: > sudo apt install gnutls-bin ykcs11 yubikey-manager
 ````
+
+### PIN/PUK Letter (optional)
+
+<a href="res/letter.en.pdf"><img src="res/letter.en.png" alt="letter.en" width="49%"/></a> <a href="res/letter.de.pdf"><img src="res/letter.de.png" alt="letter.de" width="49%"/></a>
+
+This project provides a **LaTeX letter template** (`/tex/sc.tex`), a modified version of [GerLaTeXLetter](https://github.com/fkemser/GerLaTeXLetter).
+You can use this template for **priting token-related secrets like PIN, PUK, etc.**.
+
+:warning: To use this feature **please follow all of the following setup instructions before continuing** :warning:
+  * [CUPSwrapper](https://github.com/fkemser/CUPSwrapper#prerequisites)
+  * [GerLaTeXLetter](https://github.com/fkemser/GerLaTeXLetter#prerequisites)
+  * [TeXLetterCreator](https://github.com/fkemser/TeXLetterCreator#prerequisites)
+
+Afterwards, please install some **additional but required CTAN packages**
+
+```sh
+tlmgr install environ microtype pgf tcolorbox tikzfill trimspaces
+```
+
+**To customize the template** please edit the files within the `/tex` folder. For more information please have a look at [GerLaTeXLetter](https://github.com/fkemser/GerLaTeXLetter#customization). The instructions for `letter.tex` also apply to `sc.tex`.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

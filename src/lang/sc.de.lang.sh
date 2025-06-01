@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# SPDX-FileCopyrightText: Copyright (c) 2022-2024 Florian Kemser and the SCwrapper contributors
+# SPDX-FileCopyrightText: Copyright (c) 2022-2025 Florian Kemser and the SCwrapper contributors
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 #===============================================================================
@@ -884,6 +884,11 @@ readonly L_SC_DE_HLP_DES_ARG_ACTION_ALL_RESET_PIN="${L_SC_DE_DLG_ITM_ARG_ACTION_
 #  ARG_ACTION_ALL_UNBLOCK_PIN
 readonly L_SC_DE_DLG_ITM_ARG_ACTION_ALL_UNBLOCK_PIN="Benutzer-PIN zurücksetzen (Benutzer-PUK erforderlich)"
 readonly L_SC_DE_HLP_DES_ARG_ACTION_ALL_UNBLOCK_PIN="${L_SC_DE_DLG_ITM_ARG_ACTION_ALL_UNBLOCK_PIN}. Nur mit '${L_SC_HLP_PAR_ARG_TOKEN_TYPE_OPENSC_P11}', '${L_SC_HLP_PAR_ARG_TOKEN_TYPE_OPENSC_P15}' oder '${L_SC_HLP_PAR_ARG_TOKEN_TYPE_YUBICO}'. Siehe auch '${L_SC_HLP_PAR_ARG_ALL_NEWPINPUK}' und '${L_SC_HLP_PAR_ARG_ALL_PUK}'."
+
+#  ARG_ACTION_ALL_VERIFY
+readonly L_SC_DE_HLP_DES_ARG_ACTION_ALL_VERIFY="Geheimnummer (PIN, PUK, etc.) verifizieren. Gibt entweder '0' (Zugriff erfolgreich) oder '1' (Zugriff verweigert) zurück."
+readonly L_SC_DE_HLP_DES_ARG_ACTION_ALL_VERIFY_OPENSC_P11="${L_SC_DE_HLP_REF_ARG_ALL_PIN_SOPIN}"
+readonly L_SC_DE_HLP_DES_ARG_ACTION_ALL_VERIFY_OPENSC_P15="Die PIN, PUK, SO-PIN bzw. SO-PUK kann mit '${L_SC_HLP_PAR_ARG_ALL_PIN}', '${L_SC_HLP_PAR_ARG_ALL_PUK}', '${L_SC_HLP_PAR_ARG_ALL_SOPIN}' bzw. '${L_SC_HLP_PAR_ARG_ALL_SOPUK}' angegeben werden."
 
 #===============================================================================
 #  GLOBAL VARIABLES (CUSTOM)

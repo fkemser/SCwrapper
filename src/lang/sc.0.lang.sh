@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# SPDX-FileCopyrightText: Copyright (c) 2022-2024 Florian Kemser and the SCwrapper contributors
+# SPDX-FileCopyrightText: Copyright (c) 2022-2025 Florian Kemser and the SCwrapper contributors
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 #===============================================================================
@@ -187,7 +187,7 @@ readonly L_SC_ABOUT_RUN="./$(basename "$0")"
 readonly L_SC_ABOUT_VERSION="1.0.0"
 
 #  (Optional) Project year(s), e.g. '2023', '2023-2024'
-readonly L_SC_ABOUT_YEARS="2022-2024"
+readonly L_SC_ABOUT_YEARS="2022-2025"
 
 #===============================================================================
 #  PARAMETER (TEMPLATE) - DO NOT EDIT
@@ -262,6 +262,7 @@ readonly L_SC_HLP_PAR_ARG_ACTION_ALL_KEYPAIRGEN="--keypairgen [<file>]"
 readonly L_SC_HLP_PAR_ARG_ACTION_ALL_LIST="--list <type>"
 readonly L_SC_HLP_PAR_ARG_ACTION_ALL_RESET_PIN="--reset-pin"
 readonly L_SC_HLP_PAR_ARG_ACTION_ALL_UNBLOCK_PIN="--unblock-pin"
+readonly L_SC_HLP_PAR_ARG_ACTION_ALL_VERIFY="--verify <type>"
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #  Other parameters <arg_...> (Token type)
