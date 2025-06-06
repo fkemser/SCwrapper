@@ -66,6 +66,11 @@ readonly L_SC_DE_HLP_DES_ARG_TOKEN_TYPE="Zu verwendenden Tokentyp auswählen"
 #  Other parameters <arg_...> (PKCS#11-related)
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #-------------------------------------------------------------------------------
+#  arg_p11_module
+#-------------------------------------------------------------------------------
+readonly L_SC_DE_HLP_DES_ARG_P11_MODULE="Legt die zu verwendende PKCS#11-Bibliothek fest. Dieser Parameter wird automatisch gesetzt, kann aber für spezielle Anwendungsfälle manuell geändert werden."
+
+#-------------------------------------------------------------------------------
 #  p11_uri
 #-------------------------------------------------------------------------------
 readonly L_SC_DE_DLG_TTL_P11_URI_1="PKCS#11 URI (Token)"

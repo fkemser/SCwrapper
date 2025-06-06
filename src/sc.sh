@@ -153,7 +153,6 @@ readonly ARG_ACTION_YUBICO_CHANGE_MANAGEMENT_KEY="change-management-key"
 #-------------------------------------------------------------------------------
 #  Token type
 #-------------------------------------------------------------------------------
-# See also variable 'all_p11lib' and 'all_p11lib_full'
 readonly ARG_TOKEN_TYPE_OPENSC_P11="opensc-p11"
 readonly ARG_TOKEN_TYPE_OPENSC_P15="opensc-p15"
 readonly ARG_TOKEN_TYPE_SCHSM="schsm"
@@ -164,6 +163,12 @@ arg_token_type="${ARG_TOKEN_TYPE_OPENSC_P11}"
 #-------------------------------------------------------------------------------
 #  PKCS#11-related
 #-------------------------------------------------------------------------------
+# PKCS#11 library ('--module' (pkcs11-tool)), see also 'p11_module_fullpath'
+readonly ARG_P11_MODULE_OPENSC="opensc-pkcs11.so" # OpenSC, see https://github.com/OpenSC/libp11
+readonly ARG_P11_MODULE_YUBICO="libykcs11.so"     # Yubico YubiKey, see https://developers.yubico.com/yubico-piv-tool/YKCS11/
+readonly ARG_P11_MODULE_LIST="OPENSC YUBICO"      # List of PKCS#11 libraries
+arg_p11_module=""
+
 # PKCS#11 URI (object) filter
 # See also:
 #   https://datatracker.ietf.org/doc/html/rfc7512
@@ -573,18 +578,15 @@ all_file_content=""
 # see also argument 'arg_all_force' ('--force' (sc-hsm-tool, ykman)
 all_force=""
 
-# PKCS#11 library ('--module' (pkcs11-tool))
-readonly P11LIB_OPENSC="opensc-pkcs11.so" # OpenSC, see https://github.com/OpenSC/libp11
-readonly P11LIB_YUBICO="libykcs11.so"     # Yubico YubiKey, see https://developers.yubico.com/yubico-piv-tool/YKCS11/
-all_p11lib="${P11LIB_OPENSC}"
-
-# PKCS#11 library full path ('--provider' (p11tool))
-all_p11lib_full=""
-
 #-------------------------------------------------------------------------------
 #  PKCS#11-related
 #-------------------------------------------------------------------------------
-p11_uri="" # PKCS#11 URI of selected token object, see 'p11_get_uri()'
+# PKCS#11 library full filepath ('--provider' (p11tool))
+# See also 'arg_p11_module'
+p11_module_fullpath=""
+
+# PKCS#11 URI of selected token object, see 'p11_get_uri()'
+p11_uri=""
 
 #-------------------------------------------------------------------------------
 #  PKCS#15-related
@@ -731,8 +733,8 @@ ALL_LIST P11_GET_URI ALL_UNBLOCK_PIN ALL_VERIFY"
 readonly LIST_ARG_OPENSC_P11="\
 ARG_ALL_DATA_APPLICATION_NAME ARG_ALL_DATA_OID ARG_ALL_FORMAT \
 ARG_ALL_ID_OBJECT ARG_ALL_KEY_TYPE ARG_ALL_LABEL ARG_ALL_NEWPINPUK \
-ARG_ALL_PASSWORD ARG_ALL_PIN ARG_ALL_PUK ARG_ALL_ID_READER ARG_ALL_SOPIN \
-ARG_ALL_SOPUK ARG_ALL_TYPE"
+ARG_P11_MODULE ARG_ALL_PASSWORD ARG_ALL_PIN ARG_ALL_PUK ARG_ALL_ID_READER \
+ARG_ALL_SOPIN ARG_ALL_SOPUK ARG_ALL_TYPE"
 
 #  OpenSC (PKCS#15)
 readonly LIST_ARG_OPENSC_P15="\
@@ -1270,6 +1272,15 @@ args_check() {
   #  PKCS#11-related
   #=============================================================================
   #-----------------------------------------------------------------------------
+  #  arg_p11_module
+  #-----------------------------------------------------------------------------
+  if lib_core_is --not-empty "${arg_p11_module}"; then
+    lib_core_list_contains_str_ptr "${arg_p11_module}"        \
+      "${ARG_P11_MODULE_LIST}" " " "ARG_P11_MODULE_"          || \
+    lib_shtpl_arg_error "arg_p11_module"
+  fi                                                                        && \
+
+  #-----------------------------------------------------------------------------
   #  arg_p11_uri_filter
   #-----------------------------------------------------------------------------
   if lib_core_is --not-empty "${arg_p11_uri_filter}"; then
@@ -1645,7 +1656,7 @@ args_check() {
 #
 #                arg_opensc_p15_profile
 #
-#                arg_p11_uri_filter
+#                arg_p11_module                   arg_p11_uri_filter
 #
 #                arg_p15_id_aid                   arg_p15_id_auth
 #
@@ -1719,6 +1730,7 @@ args_read() {
         ;;
 
       #  Parameter
+      --p11-module)  arg_p11_module="$2"; [ $# -ge 1 ] && { shift; };;
 
       #-------------------------------------------------------------------------
       #  PKCS#15-related
@@ -2437,6 +2449,14 @@ $(lib_shtpl_arg --des "ARG_ALL_SERIAL_YUBICO")" " " ""                          
     "$(lib_shtpl_arg --par "arg_all_sopuk")"      "$(lib_shtpl_arg --des "arg_all_sopuk")" " " ""         \
     "$(lib_shtpl_arg --par "arg_all_type")"       "$(lib_shtpl_arg --list-des "arg_all_type")"
   #-----------------------------------------------------------------------------
+  #  SYNOPSIS (OPTION) (OpenSC (PKCS#11))
+  #-----------------------------------------------------------------------------
+  lib_msg_print_heading -311 "${L_SC_DLG_ITM_ARG_TOKEN_TYPE_OPENSC_P11}"
+  lib_msg_print_propvalue "--left" "--left" "2" "" " " \
+    "$(lib_shtpl_arg --par "arg_p11_module")"                 "$(lib_shtpl_arg --des "arg_p11_module")
+
+$(lib_shtpl_arg --list-ptr "arg_p11_module")"
+  #-----------------------------------------------------------------------------
   #  SYNOPSIS (OPTION) (OpenSC (PKCS#15))
   #-----------------------------------------------------------------------------
   lib_msg_print_heading -311 "${L_SC_DLG_ITM_ARG_TOKEN_TYPE_OPENSC_P15}"
@@ -2582,18 +2602,50 @@ init_check_post() {
   #-----------------------------------------------------------------------------
   case "${arg_token_type}" in
     ${ARG_TOKEN_TYPE_OPENSC_P11})
-      lib_core_is --cmd "opensc-tool" "p11tool" "pkcs11-tool"
+      #-------------------------------------------------------------------------
+      #  OpenSC (PKCS#11)
+      #-------------------------------------------------------------------------
+      # Check commands
+      lib_core_is --cmd "opensc-tool" "p11tool" "pkcs11-tool"             && \
+
+      # Set PKCS#11 library
+      arg_p11_module="${arg_p11_module:-${ARG_P11_MODULE_OPENSC}}"
       ;;
     ${ARG_TOKEN_TYPE_OPENSC_P15})
-      lib_core_is --cmd "opensc-tool" "pkcs15-init" "pkcs15-tool"
+      #-------------------------------------------------------------------------
+      #  OpenSC (PKCS#15)
+      #-------------------------------------------------------------------------
+      # Check commands
+      lib_core_is --cmd "opensc-tool" "pkcs15-init" "pkcs15-tool"           && \
+
+      # Set PKCS#11 library (needed as some <opensc_p11_...()> functions are
+      # even called with PKCS#15 mode, e.g. see <opensc_p15_get()>)
+      arg_p11_module="${ARG_P11_MODULE_OPENSC}"
       ;;
     ${ARG_TOKEN_TYPE_SCHSM})
-      lib_core_is --cmd "opensc-tool" "openssl" "p11tool" "pkcs11-tool" "pkcs15-tool" "sc-hsm-tool"
+      #-------------------------------------------------------------------------
+      #  SmartCard-HSM / Nitrokey HSM 2
+      #-------------------------------------------------------------------------
+      # Check commands
+      lib_core_is --cmd "opensc-tool" "openssl" "p11tool" "pkcs11-tool" "pkcs15-tool" "sc-hsm-tool" && \
+
+      # Set PKCS#11 library
+      arg_p11_module="${ARG_P11_MODULE_OPENSC}"
       ;;
     ${ARG_TOKEN_TYPE_YUBICO})
-      lib_core_is --cmd "p11tool" "ykman"
+      #-------------------------------------------------------------------------
+      #  Yubico YubiKey PIV
+      #-------------------------------------------------------------------------
+      # Check commands
+      lib_core_is --cmd "p11tool" "ykman" && \
+
+      # Set PKCS#11 library
+      arg_p11_module="${ARG_P11_MODULE_YUBICO}"
       ;;
-  esac                                                                      || \
+  esac                                                                      && \
+
+  # Set PKCS#11 library (full filepath)
+  p11_module_fullpath="$(lib_os_lib --file "${arg_p11_module}")"            || \
   #-----------------------------------------------------------------------------
   #                                     /|\
   #                                    /|||\
@@ -2830,8 +2882,6 @@ init_update() {
   #  Clear global variables that will be updated in this function
   #-----------------------------------------------------------------------------
   all_force=""                                                              && \
-  all_p11lib=""                                                             && \
-  all_p11lib_full=""                                                        && \
   all_secrets_arg_input=""                                                  && \
   all_secrets_arg_list_change=""                                            && \
   all_secrets_arg_replace=""                                                && \
@@ -2845,9 +2895,6 @@ init_update() {
       #-------------------------------------------------------------------------
       #  OpenSC (PKCS#11)
       #-------------------------------------------------------------------------
-      # Set PKCS#11 library
-      all_p11lib="${P11LIB_OPENSC}"                                         && \
-
       # Determine if current PIN, PUK, SO-PIN, ... is required
       case "${arg_action}" in
         ${ARG_ACTION_ALL_CHANGE_PIN}|${ARG_ACTION_ALL_DELETE}|\
@@ -2869,10 +2916,6 @@ init_update() {
       #-------------------------------------------------------------------------
       #  OpenSC (PKCS#15)
       #-------------------------------------------------------------------------
-      # Set PKCS#11 library (needed as some <opensc_p11_...()> functions are
-      # even called with PKCS#15 mode, e.g. see <opensc_p15_get()>)
-      all_p11lib="${P11LIB_OPENSC}"                                         && \
-
       # Determine if current PIN, PUK, SO-PIN, ... is required
       case "${arg_action}" in
         ${ARG_ACTION_ALL_CHANGE_PIN}|${ARG_ACTION_ALL_DELETE}|\
@@ -2916,9 +2959,6 @@ init_update() {
       #-------------------------------------------------------------------------
       #  SmartCard-HSM / Nitrokey HSM 2
       #-------------------------------------------------------------------------
-      # Set PKCS#11 library
-      all_p11lib="${P11LIB_OPENSC}"                                         && \
-
       if ${arg_all_force}; then all_force="--force"; fi                     && \
 
       # Determine if current PIN, PUK, SO-PIN, ... is required
@@ -2946,9 +2986,6 @@ init_update() {
       #-------------------------------------------------------------------------
       #  Yubico YubiKey PIV
       #-------------------------------------------------------------------------
-      # Set PKCS#11 library
-      all_p11lib="${P11LIB_YUBICO}"                                         && \
-
       if ${arg_all_force}; then all_force="--force"; fi                     && \
 
       # Determine if current PIN, PUK, SO-PIN, ... is required
@@ -3052,10 +3089,7 @@ init_update() {
   # (Optionally) generate new PIN, PUK, SO-PIN, ... randomly
   if ${arg_all_random} && lib_core_is --not-empty "${all_secrets_arg_list_change}"; then
     all_secrets_random "${all_secrets_mode}" "${all_secrets_arg_list_change}" "${all_secrets_arg_replace}"
-  fi                                                                        && \
-
-  # Set PKCS#11 library (full path)
-  all_p11lib_full="$(lib_os_lib --file "${all_p11lib}")"                    || \
+  fi                                                                        || \
   #-----------------------------------------------------------------------------
   #                                     /|\
   #                                    /|||\
@@ -4131,15 +4165,15 @@ menu_p11_uri() {
     while true; do
       exitcode="0"
       uris="$(for a in \
-        $(p11tool --list-token-urls --provider "${all_p11lib_full}"); do
+        $(p11tool --list-token-urls --provider "${p11_module_fullpath}"); do
           printf "%s\n%s\n" "$a" "."
         done)"                                                              && \
 
       result="$(dialog --title "${title1}" --menu "${text}" 0 0 0 \
         ${uris} 2>&1 1>&3)"                                                 && \
 
-      uris="$(p11tool --list-${arg_p11_uri_filter}    \
-                      --provider "${all_p11lib_full}" \
+      uris="$(p11tool --list-${arg_p11_uri_filter}        \
+                      --provider "${p11_module_fullpath}" \
                       "${result}" 2>/dev/null)"                             && \
       uris="$(printf "%s" "${uris}" | sed -ne \
         "s/^[[:space:]]*URL\:[[:space:]]\{1,\}\(.\{1,\}\)$/\1/p")"          && \
@@ -4905,7 +4939,7 @@ all_unblock_pin() {
 #===============================================================================
 all_verify() {
   local arg
-  
+
   case "${arg_all_verify}" in
     ${ARG_ALL_VERIFY_PIN})    arg="arg_all_pin" ;;
     ${ARG_ALL_VERIFY_PUK})    arg="arg_all_puk" ;;
@@ -5938,7 +5972,7 @@ menu_arg_all_key_type() {
         ${ARG_TOKEN_TYPE_OPENSC_P11}|${ARG_TOKEN_TYPE_SCHSM})
           msg1="$(printf "%s\n\n%s" "${text1}"                          \
             "$(pkcs11-tool --list-mechanisms                            \
-                ${all_p11lib:+--module ${all_p11lib}}                   \
+                ${arg_p11_module:+--module ${arg_p11_module}}           \
                 ${arg_all_id_reader:+--slot-index ${arg_all_id_reader}} \
             )"                                                          \
           )"                                                            && \
@@ -6311,7 +6345,7 @@ opensc_p11_change_pin() {
     pkcs11-tool --change-pin                                \
       --login ${arg_all_pin:+--pin env:arg_all_pin}         \
       ${arg_all_newpinpuk:+--new-pin env:arg_all_newpinpuk} \
-      ${all_p11lib:+--module ${all_p11lib}}                 \
+      ${arg_p11_module:+--module ${arg_p11_module}}         \
       ${arg_all_id_reader:+--slot-index ${arg_all_id_reader}}
   )
 }
@@ -6326,7 +6360,7 @@ opensc_p11_change_so_pin() {
       --login --login-type so                               \
       ${arg_all_sopin:+--so-pin env:arg_all_sopin}          \
       ${arg_all_newpinpuk:+--new-pin env:arg_all_newpinpuk} \
-      ${all_p11lib:+--module ${all_p11lib}}                 \
+      ${arg_p11_module:+--module ${arg_p11_module}}         \
       ${arg_all_id_reader:+--slot-index ${arg_all_id_reader}}
   )
 }
@@ -6344,7 +6378,7 @@ opensc_p11_delete() {
       ${arg_all_data_oid:+--application-id ${arg_all_data_oid}} \
       ${arg_all_id_object:+--id ${arg_all_id_object}}       \
       ${arg_all_label:+--label "${arg_all_label}"}          \
-      ${all_p11lib:+--module ${all_p11lib}}                 \
+      ${arg_p11_module:+--module ${arg_p11_module}}         \
       ${arg_all_id_reader:+--slot-index ${arg_all_id_reader}}
   )
 }
@@ -6360,7 +6394,7 @@ opensc_p11_export() {
     ${arg_all_data_oid:+--application-id ${arg_all_data_oid}} \
     ${arg_all_id_object:+--id ${arg_all_id_object}}       \
     ${arg_all_label:+--label "${arg_all_label}"}          \
-    ${all_p11lib:+--module ${all_p11lib}}                 \
+    ${arg_p11_module:+--module ${arg_p11_module}}         \
     ${arg_all_id_reader:+--slot-index ${arg_all_id_reader}}
 }
 
@@ -6381,9 +6415,9 @@ opensc_p11_get() {
       local token_model
       local serial_num
 
-      input="$(                                                             \
-        pkcs11-tool --list-slots ${all_p11lib:+--module ${all_p11lib}}      \
-      )"                                                                    && \
+      input="$(pkcs11-tool                                          \
+        --list-slots ${arg_p11_module:+--module ${arg_p11_module}}  \
+      )"                                                            && \
       { token_manufacturer="$(printf "%s" "${input}" \
           | sed -ne "s/^[[:space:]]*token manufacturer[[:space:]]*:[[:space:]]*\(.*\)$/\1/p")"
         token_model="$(printf "%s" "${input}" \
@@ -6423,7 +6457,7 @@ opensc_p11_import() {
       ${arg_all_data_oid:+--application-id ${arg_all_data_oid}}         \
       ${arg_all_id_object:+--id ${arg_all_id_object}}                   \
       ${arg_all_label:+--label "${arg_all_label}"}                      \
-      ${all_p11lib:+--module ${all_p11lib}}                             \
+      ${arg_p11_module:+--module ${arg_p11_module}}                     \
       ${arg_all_id_reader:+--slot-index ${arg_all_id_reader}}
   )
 }
@@ -6437,7 +6471,7 @@ opensc_p11_initialize() {
     pkcs11-tool --init-token --init-pin --label "${arg_all_label}"  \
       ${arg_all_pin:+--pin env:arg_all_pin}                         \
       ${arg_all_sopin:+--so-pin env:arg_all_sopin}                  \
-      ${all_p11lib:+--module ${all_p11lib}}                         \
+      ${arg_p11_module:+--module ${arg_p11_module}}                 \
       ${arg_all_id_reader:+--slot-index ${arg_all_id_reader}}
   )
 }
@@ -6460,7 +6494,7 @@ opensc_p11_keypairgen() {
       ${arg_all_sopin:+--so-pin env:arg_all_sopin}          \
       ${arg_all_id_object:+--id ${arg_all_id_object}}       \
       ${arg_all_label:+--label "${arg_all_label}"}          \
-      ${all_p11lib:+--module ${all_p11lib}}                 \
+      ${arg_p11_module:+--module ${arg_p11_module}}         \
       ${arg_all_id_reader:+--slot-index ${arg_all_id_reader}}
   )
 }
@@ -6481,12 +6515,12 @@ opensc_p11_list() {
   case "${arg_all_type}" in
     ${ARG_ALL_TYPE_READER})
       pkcs11-tool --list-${list}                            \
-        ${all_p11lib:+--module ${all_p11lib}}
+        ${arg_p11_module:+--module ${arg_p11_module}}
       ;;
 
     *)
       pkcs11-tool --list-${list}                            \
-        ${all_p11lib:+--module ${all_p11lib}}               \
+        ${arg_p11_module:+--module ${arg_p11_module}}       \
         ${arg_all_id_reader:+--slot-index ${arg_all_id_reader}}
       ;;
   esac
@@ -6502,7 +6536,7 @@ opensc_p11_reset_pin() {
       --login --login-type so                               \
       ${arg_all_sopin:+--so-pin env:arg_all_sopin}          \
       ${arg_all_newpinpuk:+--new-pin env:arg_all_newpinpuk} \
-      ${all_p11lib:+--module ${all_p11lib}}                 \
+      ${arg_p11_module:+--module ${arg_p11_module}}         \
       ${arg_all_id_reader:+--slot-index ${arg_all_id_reader}}
   )
 }
@@ -6517,7 +6551,7 @@ opensc_p11_unblock_pin() {
       --login --login-type context-specific                 \
       ${arg_all_puk:+--puk env:arg_all_puk}                 \
       ${arg_all_newpinpuk:+--new-pin env:arg_all_newpinpuk} \
-      ${all_p11lib:+--module ${all_p11lib}}                 \
+      ${arg_p11_module:+--module ${arg_p11_module}}         \
       ${arg_all_id_reader:+--slot-index ${arg_all_id_reader}}
   )
 }
@@ -6543,10 +6577,10 @@ opensc_p11_verify_pinpuk() {
   esac
 
   ( export val
-    pkcs11-tool --show-info                             \
-      --login --login-type ${login_type}                \
-      --${param} env:val                                \
-      ${all_p11lib:+--module ${all_p11lib}}             \
+    pkcs11-tool --show-info                                   \
+      --login --login-type ${login_type}                      \
+      --${param} env:val                                      \
+      ${arg_p11_module:+--module ${arg_p11_module}}           \
       ${arg_all_id_reader:+--slot-index ${arg_all_id_reader}} \
     2>&1 1>/dev/null
   )
