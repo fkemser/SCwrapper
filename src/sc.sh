@@ -364,6 +364,7 @@ readonly ARG_ALL_VERIFY_PIN="pin"
 readonly ARG_ALL_VERIFY_PUK="puk"
 readonly ARG_ALL_VERIFY_SOPIN="so-pin"
 readonly ARG_ALL_VERIFY_SOPUK="so-puk"
+readonly ARG_ALL_VERIFY_YUBICO_MANAGEMENT_KEY="yubico-management-key"
 readonly ARG_ALL_VERIFY_LIST="PIN"
 arg_all_verify=""
 
@@ -517,7 +518,7 @@ readonly ARG_ALL_TYPE_LIST_YUBICO_IMPORT="CERT DATA PRIVKEY"
 readonly ARG_ALL_TYPE_LIST_YUBICO_LIST="ALGORITHM DATA INFO READER"
 
 # List of secrets (PIN, PUK, etc.) to verify
-readonly ARG_ALL_VERIFY_LIST_YUBICO="${ARG_ALL_VERIFY_LIST_OPENSC_P11}"
+readonly ARG_ALL_VERIFY_LIST_YUBICO="PIN YUBICO_MANAGEMENT_KEY"
 
 # '--management-key' (ykman piv ...)
 readonly ARG_YUBICO_MANAGEMENT_KEY_DEFAULT_YUBICO=""
@@ -755,7 +756,7 @@ ARG_SCHSM_PWD_SHARES_TOTAL ARG_ALL_SOPIN ARG_ALL_SOPUK ARG_ALL_TYPE"
 readonly LIST_ARG_YUBICO="\
 ARG_ALL_FORCE ARG_ALL_FORMAT ARG_ALL_KEY_TYPE ARG_ALL_NEWPINPUK \
 ARG_ALL_PASSWORD ARG_ALL_PIN ARG_PIV_BER_TLV_TAG ARG_PIV_KEYREF ARG_ALL_PUK \
-ARG_ALL_SERIAL ARG_ALL_SOPIN ARG_ALL_SOPUK ARG_ALL_TYPE \
+ARG_ALL_SERIAL ARG_ALL_TYPE \
 ARG_YUBICO_MANAGEMENT_KEY ARG_YUBICO_NEW_MANAGEMENT_KEY ARG_YUBICO_PIN_POLICY \
 ARG_YUBICO_TOUCH_POLICY"
 
@@ -2302,7 +2303,6 @@ $(lib_shtpl_arg --list-des-def "arg_p11_uri_filter")" " " ""                    
 
 ${L_SC_HLP_TXT_HEADER_OPENSC_P11}
 ${L_SC_HLP_TXT_HEADER_SCHSM}
-${L_SC_HLP_TXT_HEADER_YUBICO}
 $(lib_shtpl_arg --des "ARG_ACTION_ALL_VERIFY_OPENSC_P11")
 
 <type>$(lib_shtpl_arg --list-ptr "arg_all_verify" "OPENSC_P11")
@@ -2310,7 +2310,12 @@ $(lib_shtpl_arg --des "ARG_ACTION_ALL_VERIFY_OPENSC_P11")
 ${L_SC_HLP_TXT_HEADER_OPENSC_P15}
 $(lib_shtpl_arg --des "ARG_ACTION_ALL_VERIFY_OPENSC_P15")
 
-<type>$(lib_shtpl_arg --list-ptr "arg_all_verify" "OPENSC_P15")"
+<type>$(lib_shtpl_arg --list-ptr "arg_all_verify" "OPENSC_P15")
+
+${L_SC_HLP_TXT_HEADER_YUBICO}
+$(lib_shtpl_arg --des "ARG_ACTION_ALL_VERIFY_YUBICO")
+
+<type>$(lib_shtpl_arg --list-ptr "arg_all_verify" "YUBICO")"
 
   #-----------------------------------------------------------------------------
   #  SYNOPSIS (ACTION) (OpenSC PKCS#15)
@@ -4945,6 +4950,7 @@ all_verify() {
     ${ARG_ALL_VERIFY_PUK})    arg="arg_all_puk" ;;
     ${ARG_ALL_VERIFY_SOPIN})  arg="arg_all_sopin" ;;
     ${ARG_ALL_VERIFY_SOPUK})  arg="arg_all_sopuk" ;;
+    ${ARG_ALL_VERIFY_YUBICO_MANAGEMENT_KEY})  arg="arg_yubico_management_key" ;;
   esac
 
   eval all_verify_pinpuk "${arg}" \"\${${arg}}\"
@@ -6579,6 +6585,7 @@ opensc_p11_verify_pinpuk() {
   case "${arg}" in
     arg_all_pin) param="pin"; login_type="user" ;;
     arg_all_sopin) param="so-pin"; login_type="so" ;;
+    arg_yubico_management_key) param="so-pin"; login_type="so" ;;
     *) return ;;
   esac
 

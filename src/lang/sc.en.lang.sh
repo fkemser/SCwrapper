@@ -894,6 +894,7 @@ readonly L_SC_EN_HLP_DES_ARG_ACTION_ALL_UNBLOCK_PIN="${L_SC_EN_DLG_ITM_ARG_ACTIO
 readonly L_SC_EN_HLP_DES_ARG_ACTION_ALL_VERIFY="Verify a PIN, PUK, etc. by trying to access the token. Returns either '0' (access granted) or '1' (access denied)."
 readonly L_SC_EN_HLP_DES_ARG_ACTION_ALL_VERIFY_OPENSC_P11="${L_SC_EN_HLP_REF_ARG_ALL_PIN_SOPIN}."
 readonly L_SC_EN_HLP_DES_ARG_ACTION_ALL_VERIFY_OPENSC_P15="Use '${L_SC_HLP_PAR_ARG_ALL_PIN}', '${L_SC_HLP_PAR_ARG_ALL_PUK}', '${L_SC_HLP_PAR_ARG_ALL_SOPIN}' or '${L_SC_HLP_PAR_ARG_ALL_SOPUK}' to specify the PIN, PUK, SO-PIN or SO-PUK to use."
+readonly L_SC_EN_HLP_DES_ARG_ACTION_ALL_VERIFY_YUBICO="${L_SC_EN_HLP_REF_ARG_ALL_PIN}. ${L_SC_EN_HLP_REF_ARG_YUBICO_MANAGEMENT_KEY}"
 
 #===============================================================================
 #  GLOBAL VARIABLES (CUSTOM)
