@@ -6483,8 +6483,14 @@ opensc_p11_initialize() {
 opensc_p11_keypairgen() {
   local login_type
   case "${arg_token_type}" in
-    ${ARG_TOKEN_TYPE_OPENSC_P11}|${ARG_TOKEN_TYPE_SCHSM}) login_type="user" ;;
-    ${ARG_TOKEN_TYPE_YUBICO}) login_type="so" ;;
+    ${ARG_TOKEN_TYPE_OPENSC_P11})
+      case "${arg_p11_module}" in
+        ${ARG_P11_MODULE_OPENSC}) login_type="user" ;;
+        ${ARG_P11_MODULE_YUBICO}) login_type="so"   ;;
+      esac
+      ;;
+    ${ARG_TOKEN_TYPE_SCHSM})      login_type="user" ;;
+    ${ARG_TOKEN_TYPE_YUBICO})     login_type="so"   ;;
   esac
 
   ( export arg_all_pin arg_all_sopin
@@ -6577,7 +6583,7 @@ opensc_p11_verify_pinpuk() {
   esac
 
   ( export val
-    pkcs11-tool --show-info                                   \
+    pkcs11-tool --show-info --session-rw                      \
       --login --login-type ${login_type}                      \
       --${param} env:val                                      \
       ${arg_p11_module:+--module ${arg_p11_module}}           \
