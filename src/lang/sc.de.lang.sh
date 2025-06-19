@@ -864,6 +864,9 @@ readonly L_SC_DE_HLP_DES_ARG_ACTION_ALL_INITIALIZE_YUBICO="Löscht alle PIV-bezo
 PIN, PUK und Management Key können mit '${L_SC_HLP_PAR_ARG_ALL_PIN}', '${L_SC_HLP_PAR_ARG_ALL_PUK}' und '${L_SC_HLP_PAR_ARG_YUBICO_MANAGEMENT_KEY}' festgelegt werden."
 readonly L_SC_DE_TXT_ARG_ACTION_ALL_INITIALIZE_OPENSC_P15_INFO="Token erfolgreich initialisiert."
 
+#  ARG_ACTION_ALL_IS_CONNECTED
+readonly L_SC_DE_HLP_DES_ARG_ACTION_ALL_IS_CONNECTED="Prüft, ob ein Leser bzw. ein(e) Token/Smartcard angeschlossen ist. Gibt entweder '0' (verbunden) oder '1' (nicht verbunden) zurück."
+
 #  ARG_ACTION_ALL_KEYPAIRGEN
 readonly L_SC_DE_DLG_ITM_ARG_ACTION_ALL_KEYPAIRGEN="Öffentlich-privates Schlüsselpaar erzeugen"
 readonly L_SC_DE_HLP_DES_ARG_ACTION_ALL_KEYPAIRGEN="${L_SC_DE_DLG_ITM_ARG_ACTION_ALL_KEYPAIRGEN}. <file> ist nur erlaubt (und notwendig) mit '${L_SC_HLP_PAR_ARG_TOKEN_TYPE_YUBICO}'. ${L_SC_DE_HLP_REF_ARG_ALL_KEY_TYPE}"

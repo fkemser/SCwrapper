@@ -92,6 +92,7 @@ readonly ARG_ACTION_ALL_EXPORT="export"
 readonly ARG_ACTION_ALL_GET="get"
 readonly ARG_ACTION_ALL_IMPORT="import"
 readonly ARG_ACTION_ALL_INITIALIZE="initialize"
+readonly ARG_ACTION_ALL_IS_CONNECTED="is-connected"
 readonly ARG_ACTION_ALL_KEYPAIRGEN="keypairgen"
 readonly ARG_ACTION_ALL_LIST="list"
 readonly ARG_ACTION_ALL_RESET_PIN="reset-pin"
@@ -259,6 +260,12 @@ arg_all_id_object=""
 
 # Slot/Reader ID ('--slot' (pkcs11-tool), '--reader' (pkcs15-tool, sc-hsm-tool))
 arg_all_id_reader=""
+
+# Check if just a reader or a smartcard/token is connected
+readonly ARG_ALL_IS_CONNECTED_READER="reader"
+readonly ARG_ALL_IS_CONNECTED_SMARTCARD="smartcard"
+readonly ARG_ALL_IS_CONNECTED_LIST="READER SMARTCARD"
+arg_all_is_connected=""
 
 # Key type (algorithm, length)
 # '--key-type' (pkcs11-tool), '--generate-key' (pkcs15-init),
@@ -668,8 +675,8 @@ ALL_CHANGE_PIN ALL_RESET_PIN ALL_CHANGE_SO_PIN"
 #  Classic script mode
 readonly ARG_ACTION_LIST_SCRIPT_OPENSC_P11="\
 HELP ALL_CHANGE_PIN ALL_CHANGE_SO_PIN ALL_CONNECT ALL_DELETE ALL_EXPORT \
-ALL_GET ALL_IMPORT ALL_INITIALIZE ALL_KEYPAIRGEN ALL_LIST P11_GET_URI \
-ALL_RESET_PIN ALL_VERIFY"
+ALL_GET ALL_IMPORT ALL_INITIALIZE ALL_IS_CONNECTED ALL_KEYPAIRGEN ALL_LIST \
+P11_GET_URI ALL_RESET_PIN ALL_VERIFY"
 
 #  OpenSC (PKCS#15)
 #  Interactive mode / Submenu mode
@@ -681,8 +688,8 @@ ALL_UNBLOCK_PIN ALL_CHANGE_PUK ALL_CHANGE_SO_PIN OPENSC_P15_ERASE_APPLICATION"
 readonly ARG_ACTION_LIST_SCRIPT_OPENSC_P15="\
 HELP ALL_CHANGE_PIN ALL_CHANGE_PUK ALL_CHANGE_SO_PIN ALL_CONNECT ALL_DELETE \
 OPENSC_P15_ERASE_APPLICATION OPENSC_P15_ERASE_CARD ALL_EXPORT \
-OPENSC_P15_FINALIZE ALL_GET ALL_IMPORT ALL_INITIALIZE ALL_KEYPAIRGEN \
-ALL_LIST OPENSC_P15_STORE_PIN ALL_UNBLOCK_PIN ALL_VERIFY"
+OPENSC_P15_FINALIZE ALL_GET ALL_IMPORT ALL_INITIALIZE ALL_IS_CONNECTED \
+ALL_KEYPAIRGEN ALL_LIST OPENSC_P15_STORE_PIN ALL_UNBLOCK_PIN ALL_VERIFY"
 
 #  SmartCard-HSM / Nitrokey HSM 2
 #  Interactive mode / Submenu mode
@@ -693,9 +700,9 @@ ALL_CHANGE_SO_PIN SCHSM_BACKUP SCHSM_RESTORE"
 #  Classic script mode
 readonly ARG_ACTION_LIST_SCRIPT_SCHSM="\
 HELP ALL_CHANGE_PIN ALL_CHANGE_SO_PIN ALL_CONNECT ALL_DELETE ALL_EXPORT \
-ALL_GET ALL_IMPORT ALL_INITIALIZE ALL_KEYPAIRGEN ALL_LIST P11_GET_URI \
-ALL_RESET_PIN SCHSM_BACKUP SCHSM_DKEK_SHARE_CREATE SCHSM_DKEK_SHARE_IMPORT \
-SCHSM_RESTORE ALL_VERIFY"
+ALL_GET ALL_IMPORT ALL_INITIALIZE ALL_IS_CONNECTED ALL_KEYPAIRGEN ALL_LIST \
+P11_GET_URI ALL_RESET_PIN SCHSM_BACKUP SCHSM_DKEK_SHARE_CREATE \
+SCHSM_DKEK_SHARE_IMPORT SCHSM_RESTORE ALL_VERIFY"
 
 #  Yubico YubiKey PIV
 #  Interactive mode / Submenu mode
@@ -705,8 +712,8 @@ ALL_CHANGE_PIN ALL_UNBLOCK_PIN ALL_CHANGE_PUK YUBICO_CHANGE_MANAGEMENT_KEY"
 #  Classic script mode
 readonly ARG_ACTION_LIST_SCRIPT_YUBICO="\
 HELP YUBICO_CHANGE_MANAGEMENT_KEY ALL_CHANGE_PIN ALL_CHANGE_PUK ALL_CONNECT \
-ALL_DELETE ALL_EXPORT ALL_GET ALL_IMPORT ALL_INITIALIZE ALL_KEYPAIRGEN \
-ALL_LIST P11_GET_URI ALL_UNBLOCK_PIN ALL_VERIFY"
+ALL_DELETE ALL_EXPORT ALL_GET ALL_IMPORT ALL_INITIALIZE ALL_IS_CONNECTED \
+ALL_KEYPAIRGEN ALL_LIST P11_GET_URI ALL_UNBLOCK_PIN ALL_VERIFY"
 #-------------------------------------------------------------------------------
 #                                      /|\
 #                                     /|||\
@@ -973,6 +980,7 @@ args_check() {
       #  Used by two or more token types
       #-------------------------------------------------------------------------
       ${ARG_ACTION_ALL_GET}) lib_shtpl_arg_is_set "arg_all_get";;
+      ${ARG_ACTION_ALL_IS_CONNECTED}) lib_shtpl_arg_is_set "arg_all_is_connected";;
       ${ARG_ACTION_ALL_VERIFY}) lib_shtpl_arg_is_set "arg_all_verify";;
 
       #-------------------------------------------------------------------------
@@ -1440,6 +1448,15 @@ args_check() {
   fi                                                                        && \
 
   #-----------------------------------------------------------------------------
+  #  arg_all_is_connected
+  #-----------------------------------------------------------------------------
+  if lib_core_is --not-empty "${arg_all_is_connected}"; then
+    lib_core_list_contains_str_ptr \
+      "${arg_all_is_connected}" "${ARG_ALL_IS_CONNECTED_LIST}" " " "ARG_ALL_IS_CONNECTED_" || \
+    lib_shtpl_arg_error "arg_all_is_connected" "ARG_ALL_IS_CONNECTED"
+  fi                                                                        && \
+
+  #-----------------------------------------------------------------------------
   #  arg_all_key_type
   #-----------------------------------------------------------------------------
   true                                                                      && \
@@ -1788,6 +1805,10 @@ args_read() {
       --${ARG_ACTION_ALL_GET})
         arg_action="${1#--}"
         arg_all_get="$2"; [ $# -ge 1 ] && { shift; }
+        ;;
+      --${ARG_ACTION_ALL_IS_CONNECTED})
+        arg_action="${1#--}"
+        arg_all_is_connected="$2"; [ $# -ge 1 ] && { shift; }
         ;;
       --${ARG_ACTION_ALL_LIST})
         arg_action="${1#--}"
@@ -2253,6 +2274,11 @@ $(lib_shtpl_arg --des "ARG_ACTION_ALL_INITIALIZE_SCHSM")
 
 ${L_SC_HLP_TXT_HEADER_YUBICO}
 $(lib_shtpl_arg --des "ARG_ACTION_ALL_INITIALIZE_YUBICO")" " " ""                                                           \
+                                                                                                                            \
+                                                                                                                            \
+    "$(lib_shtpl_arg --par "ARG_ACTION_ALL_IS_CONNECTED")"  "$(lib_shtpl_arg --des "ARG_ACTION_ALL_IS_CONNECTED")
+
+<type> $(lib_shtpl_arg --list-ptr "arg_all_is_connected")" " " ""                                                           \
                                                                                                                             \
                                                                                                                             \
     "$(lib_shtpl_arg --par "ARG_ACTION_ALL_KEYPAIRGEN")"  "$(lib_shtpl_arg --des "ARG_ACTION_ALL_KEYPAIRGEN")
@@ -3383,6 +3409,7 @@ run() {
     ${ARG_ACTION_ALL_GET})            all_get ;;
     ${ARG_ACTION_ALL_IMPORT})         all_import ;;
     ${ARG_ACTION_ALL_INITIALIZE})     all_initialize ;;
+    ${ARG_ACTION_ALL_IS_CONNECTED})   all_is_connected ;;
     ${ARG_ACTION_ALL_KEYPAIRGEN})     all_keypairgen ;;
     ${ARG_ACTION_ALL_LIST})           all_list ;;
     ${ARG_ACTION_ALL_RESET_PIN})      all_reset_pin ;;
@@ -4691,6 +4718,23 @@ all_initialize() {
 }
 
 #===  FUNCTION  ================================================================
+#         NAME:  all_is_connected
+#  DESCRIPTION:  Check if a reader or smartcard/token is connected
+#   RETURNS  0:  Connected
+#            1:  Not connected
+#===============================================================================
+all_is_connected() {
+  case "${arg_all_is_connected}" in
+    ${ARG_ALL_IS_CONNECTED_READER})
+      opensc-tool --list-readers | grep -q -E '^[[:digit:]]'
+      ;;
+    ${ARG_ALL_IS_CONNECTED_SMARTCARD})
+      opensc-tool --list-readers | grep -q -E '^[[:digit:]]+\s+Yes'
+      ;;
+  esac
+}
+
+#===  FUNCTION  ================================================================
 #         NAME:  all_keypairgen
 #  DESCRIPTION:  Generate (public/private) key pair
 #===============================================================================
@@ -4993,7 +5037,7 @@ menu_all_connect() {
 
     while true; do
       exitcode="0"
-      if opensc-tool --list-readers | grep -q -E '^[[:digit:]]+\s+Yes' ; then
+      if ( arg_all_is_connected="${ARG_ALL_IS_CONNECTED_SMARTCARD}"; all_is_connected; ); then
         break
       else
         dialog --title "${title2}" --yesno "${text2}" 0 0 || \
@@ -5590,7 +5634,7 @@ menu_arg_all_file() {
       exitcode="0"
       dialog --title "${title}" --msgbox "${text}" 0 0                      && \
       result="$(dialog --title "${title}"                                   \
-        --fselect "${result:-${arg_all_file:-~/}}" 0 0 2>&1 1>&3)"          && \
+        --fselect "${result:-${arg_all_file:-$HOME/}}" 0 0 2>&1 1>&3)"      && \
       result="$(lib_core_expand_tilde "${result}")"                         || \
       exitcode="$?"
 

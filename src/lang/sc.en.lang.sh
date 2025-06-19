@@ -864,6 +864,9 @@ readonly L_SC_EN_HLP_DES_ARG_ACTION_ALL_INITIALIZE_YUBICO="Wipe all PIV-related 
 Use '${L_SC_HLP_PAR_ARG_ALL_PIN}', '${L_SC_HLP_PAR_ARG_ALL_PUK}', and '${L_SC_HLP_PAR_ARG_YUBICO_MANAGEMENT_KEY}' to set PIN, PUK, and management key."
 readonly L_SC_EN_TXT_ARG_ACTION_ALL_INITIALIZE_OPENSC_P15_INFO="Token successfully initialized."
 
+#  ARG_ACTION_ALL_IS_CONNECTED
+readonly L_SC_EN_HLP_DES_ARG_ACTION_ALL_IS_CONNECTED="Check if a reader or a smartcard/token is connected. Returns either '0' (connected) or '1' (not connected)."
+
 #  ARG_ACTION_ALL_KEYPAIRGEN
 readonly L_SC_EN_DLG_ITM_ARG_ACTION_ALL_KEYPAIRGEN="Generate a public-private key pair"
 readonly L_SC_EN_HLP_DES_ARG_ACTION_ALL_KEYPAIRGEN="${L_SC_EN_DLG_ITM_ARG_ACTION_ALL_KEYPAIRGEN}. <file> is only possible (and mandatory) with '${L_SC_HLP_PAR_ARG_TOKEN_TYPE_YUBICO}'. ${L_SC_EN_HLP_REF_ARG_ALL_KEY_TYPE}"
