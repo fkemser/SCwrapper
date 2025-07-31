@@ -50,12 +50,16 @@
   </p>
 </div>
 
-
+<p align="center">
+  <img src="res/screenshot2.png" alt="screenshot2" width="49%"/> <img src="res/screenshot3.png" alt="screenshot3" width="49%"/>  
+  <img src="res/screenshot4.png" alt="screenshot4" width="49%"/> <img src="res/screenshot5.png" alt="screenshot5" width="49%"/>
+</p>
 
 <!-- TABLE OF CONTENTS -->
 <details open>
   <summary>Table of Contents</summary>
   <ol>
+    <li><a href="#tldr">TL;DR</a></li>
     <li>
       <a href="#about-the-project">About The Project</a>
       <ul>
@@ -65,19 +69,21 @@
       </ul>
     </li>
     <li>
-      <a href="#getting-started"><b>Getting Started</b></a>
+      <a href="#getting-started">Getting Started</a>
       <ul>
         <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#mandatory"><b>Mandatory</b></a></li>
-        <li><a href="#interactive-mode-optional"><b>Interactive Mode (optional)</b></a></li>
+        <li><a href="#mandatory">Mandatory</a></li>
+        <li><a href="#interactive-mode-optional">Interactive Mode (optional)</a></li>
         <li><a href="#opensc-pkcs11-and-smartcard-hsm--nitrokey-hsm-2">OpenSC PKCS#11 and SmartCard-HSM / Nitrokey HSM 2</a></li>
         <li><a href="#opensc-pkcs15">OpenSC PKCS#15</a></li>
         <li><a href="#yubico-yubikey-piv">Yubico YubiKey PIV</a></li>
         <li><a href="#pinpuk-letter-optional">PIN/PUK Letter (optional)</a></li>
-        <li><a href="#installation"><b>Installation</b></a></li>
+        <li><a href="#installation">Installation</a></li>
       </ul>
     </li>
-    <li><a href="#usage-srcscsh"><b>Usage (/src/sc.sh)</b></a></li>
+    <li><a href="#usage">Usage</a></li>
+    <li><a href="#examples-script-mode">Examples (Script Mode)</a></li>
+    <li><a href="#help-script-mode">Help (Script Mode)</a></li>
     <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
@@ -88,11 +94,37 @@
 
 
 
+<!-- TL;DR -->
+## TL;DR
+
+### 1. Install dependencies
+To install all (necessary and optional) packages on your system, simply run:
+
+#### Debian
+```sh
+sudo apt install dialog gnutls-bin opensc opensc-pkcs11 openssl \
+                 pcscd libccid ykcs11 yubikey-manager
+```
+
+Depending on your token type not all packages may be needed. For more information please have a look at the [prerequisites](#prerequisites) section below.
+
+This project provides a [customizable LaTeX letter template](#pinpuk-letter-optional) that can be used to print token-related secrets like PIN, PUK, etc.
+
+### 2. Clone the repo and run the script
+```sh
+git clone --recurse-submodules https://github.com/fkemser/SCwrapper.git && \
+chmod +x ./SCwrapper/src/sc.sh && \
+./SCwrapper/src/sc.sh
+```
+
+For more information please have a look at the [usage](#usage) and [examples](#examples-script-mode) section below.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+
 <!-- ABOUT THE PROJECT -->
 ## About The Project
-
-<img src="res/screenshot2.png" alt="screenshot2" width="49%"/> <img src="res/screenshot3.png" alt="screenshot3" width="49%"/>  
-<img src="res/screenshot4.png" alt="screenshot4" width="49%"/> <img src="res/screenshot5.png" alt="screenshot5" width="49%"/>
 
 This project provides a shell script to
 
@@ -256,13 +288,201 @@ tlmgr install environ microtype pgf tcolorbox tikzfill trimspaces
 
 
 <!-- USAGE -->
-## Usage (/src/sc.sh)
+## Usage
 
 <img src="res/usage.gif" alt="usage" width="100%"/>
 
 To call the script **interactively**, run `/src/sc.sh` (without further arguments) from your terminal.
 
-For **script mode** run `/src/sc.sh` followed by a list of arguments `--arg1 [<val1>] --arg2 [<val2>] ...`. To get help, run `/src/sc.sh -h`.
+For **script mode** run `/src/sc.sh` followed by a list of arguments `--arg1 [<val1>] --arg2 [<val2>] ...`, see also [help](#help-script-mode) section below.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+
+<!-- EXAMPLES (SCRIPT MODE) -->
+## Examples (Script Mode)
+
+[1. Initialize token](#1-initialize-token)  
+[2. Generate public-private key pair](#2-generate-public-private-key-pair)  
+[3. Import certificate / key / data object](#3-import-certificate--key--data-object)  
+[4. Export certificate / data object](#4-export-certificate--data-object)  
+[5. Delete certificate / key / data object](#5-delete-certificate--key--data-object)  
+[6. PIN Management (Change/Reset/Unblock)](#6-pin-management-changeresetunblock)  
+[7. Backup and restore private key (SmartCard-HSM / Nitrokey HSM 2 only)](#7-backup-and-restore-private-key-smartcard-hsm--nitrokey-hsm-2-only)
+
+### 1. Initialize token
+```sh
+export pin="1111"
+export puk="123456"
+export sopin="123456"
+export sopuk="123456"
+export password="secret"
+export mgmtkey="010203040506070801020304050607080102030405060708"
+```
+
+#### OpenSC PKCS#11 ('-T opensc-p11')
+```sh
+./sc.sh -T opensc-p11 --initialize --label mytoken --pin env:pin --so-pin env:sopin
+```
+
+#### OpenSC PKCS#15 ('-T opensc-p15')
+```sh
+# Step 1 - Erase PKCS#15 structure (certain models only)
+  ./sc.sh -T opensc-p15 --erase-card
+
+# Step 2 - Initialize token (all models)
+# Token supports a separate SO-PIN/SO-PUK pair
+  ./sc.sh -T opensc-p15 --initialize --pin env:pin --puk env:puk --so-pin env:sopin --so-puk env:sopuk
+# Token only supports one PIN/PUK pair
+  ./sc.sh -T opensc-p15 --initialize --opensc-p15-profile pkcs15+onepin --pin env:pin --puk env:puk
+
+# Step 3 - Finish initialization (certain models only)
+  ./sc.sh -T opensc-p15 --finalize
+```
+
+#### SmartCard-HSM / Nitrokey HSM 2 ('-T schsm')
+```sh
+# Initialize without any DKEK (= key backup/restore disabled)
+./sc.sh -T schsm --initialize --pin env:pin --so-pin env:sopin
+
+# Initialize with 1 DKEK share, with a single password (no threshold scheme)
+./sc.sh -T schsm --initialize --pin env:pin --so-pin env:sopin --schsm-dkek-shares 1
+./sc.sh -T schsm --schsm-dkek-share-create dkek-share-1.pbe --password env:password
+./sc.sh -T schsm --schsm-dkek-share-import dkek-share-1.pbe
+
+# Initialize with 1 DKEK share and a 2-of-4 threshold scheme
+./sc.sh -T schsm --initialize --pin env:pin --so-pin env:sopin --schsm-dkek-shares 1
+./sc.sh -T schsm --schsm-dkek-share-create dkek-share-1.pbe --schsm-pwd-shares-threshold 2 --schsm-pwd-shares-total 4
+./sc.sh -T schsm --schsm-dkek-share-import dkek-share-1.pbe --schsm-pwd-shares-total 2
+```
+
+#### Yubico YubiKey PIV ('-T yubico')
+```sh
+./sc.sh -T yubico --initialize --pin env:pin --puk env:puk --yubico-management-key env:mgmtkey
+```
+
+<p align="right">(<a href="#examples-script-mode">back to overview</a>)</p>
+
+### 2. Generate public-private key pair
+#### OpenSC PKCS#11 ('-T opensc-p11') and SmartCard-HSM / Nitrokey HSM 2 ('-T schsm')
+```sh
+./sc.sh -T <...> --keypairgen --id 10 --key-type rsa:2048
+./sc.sh -T <...> --keypairgen --label mykey --key-type rsa:2048
+```
+
+#### OpenSC PKCS#15 ('-T opensc-p15')
+```sh
+./sc.sh -T opensc-p15 --keypairgen --id 10 --key-type rsa/2048
+./sc.sh -T opensc-p15 --keypairgen --label mykey --key-type rsa/2048
+```
+
+#### Yubico YubiKey PIV ('-T yubico')
+```sh
+./sc.sh -T yubico --keypairgen "pubkey.pem" --format pem --piv-slot 9A --key-type RSA2048
+```
+
+<p align="right">(<a href="#examples-script-mode">back to overview</a>)</p>
+
+### 3. Import certificate / key / data object
+#### OpenSC PKCS#11 ('-T opensc-p11') and SmartCard-HSM / Nitrokey HSM 2 ('-T schsm')
+```sh
+./sc.sh -T <...>  --import cert.der   --type cert     --id 10   --label mycert
+./sc.sh -T <...>  --import key.der    --type privkey  --id 20   --label mykey
+./sc.sh -T <...>  --import data.file  --type data     --id 30   --label mydata
+```
+
+#### OpenSC PKCS#15 ('-T opensc-p15')
+```sh
+./sc.sh -T opensc-p15   --import cert.pem   --type cert     --id 10   --label mycert
+./sc.sh -T opensc-p15   --import cert.der   --type cert     --id 10   --label mycert  --format der
+./sc.sh -T opensc-p15   --import key.pem    --type privkey  --id 20   --label mykey
+./sc.sh -T opensc-p15   --import key.p12    --type privkey  --id 20   --label mykey   --format pkcs12
+./sc.sh -T opensc-p15   --import data.file  --type data               --label mydata
+```
+
+#### Yubico YubiKey PIV ('-T yubico')
+```sh
+./sc.sh -T yubico   --import cert.pem   --type cert     --piv-slot 9A   --format pem
+./sc.sh -T yubico   --import key.der    --type privkey  --piv-slot 9A   --format der
+./sc.sh -T yubico   --import data.file  --type data     --piv-id 5FC108
+```
+
+<p align="right">(<a href="#examples-script-mode">back to overview</a>)</p>
+
+### 4. Export certificate / data object
+#### OpenSC PKCS#11 ('-T opensc-p11') and SmartCard-HSM / Nitrokey HSM 2 ('-T schsm')
+```sh
+./sc.sh -T <...>    --export cert.der   --type cert   ( --id 10 | --label mycert )
+./sc.sh -T <...>    --export data.file  --type data   --label mydata
+```
+
+#### OpenSC PKCS#15 ('-T opensc-p15')
+```sh
+./sc.sh -T opensc-p15   --export cert.der   --type cert   --id 10
+./sc.sh -T opensc-p15   --export data.file  --type data   --label mydata
+```
+
+#### Yubico YubiKey PIV ('-T yubico')
+```sh
+./sc.sh -T yubico   --export cert.der   --type cert   --piv-slot 9A   --format der
+./sc.sh -T yubico   --export cert.pem   --type cert   --piv-slot 9A   --format pem
+./sc.sh -T yubico   --export data.file  --type data   --piv-id 5FC108
+```
+
+<p align="right">(<a href="#examples-script-mode">back to overview</a>)</p>
+
+### 5. Delete certificate / key / data object
+#### OpenSC PKCS#11 ('-T opensc-p11') and SmartCard-HSM / Nitrokey HSM 2 ('-T schsm')
+```sh
+./sc.sh -T <...>  --delete  --type cert     ( --id 10 | --label mycert )
+./sc.sh -T <...>  --delete  --type privkey  ( --id 20 | --label mykey )
+./sc.sh -T <...>  --delete  --type data     --label mydata  --data-application-name <name>
+./sc.sh -T <...>  --delete  --type data     --data-oid <oid>
+```
+
+#### OpenSC PKCS#15 ('-T opensc-p15')
+```sh
+./sc.sh -T opensc-p15   --delete  --type cert     --id 10
+./sc.sh -T opensc-p15   --delete  --type privkey  --id 20
+./sc.sh -T opensc-p15   --delete  --type data     --label mydata  --data-application-name <name>
+./sc.sh -T opensc-p15   --delete  --type data     --data-oid <oid>
+```
+
+#### Yubico YubiKey PIV ('-T yubico')
+```sh
+./sc.sh -T yubico --delete --type cert --piv-slot 9A
+```
+
+<p align="right">(<a href="#examples-script-mode">back to overview</a>)</p>
+
+### 6. PIN Management (Change/Reset/Unblock)
+```sh
+export oldpin="1111"
+export newpin="2222"
+export puk="123456"
+export sopin="123456"
+
+./sc.sh -T <...> --change-pin  --pin env:oldpin    --new-pin env:newpin
+./sc.sh -T <...> --reset-pin   --so-pin env:sopin  --new-pin env:newpin
+./sc.sh -T <...> --unblock-pin --puk env:puk       --new-pin env:newpin
+```
+
+<p align="right">(<a href="#examples-script-mode">back to overview</a>)</p>
+
+### 7. Backup and restore private key (SmartCard-HSM / Nitrokey HSM 2 only)
+```sh
+./sc.sh -T schsm  --schsm-backup  wrap-key.bin  --schsm-key-reference 1
+./sc.sh -T schsm  --schsm-restore wrap-key.bin  --schsm-key-reference 10
+```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+
+<!-- HELP (SCRIPT MODE) -->
+## Help (Script Mode)
+To get help, run `./SCwrapper/src/sc.sh -h`.  
 
 ```sh
 ================================================================================
@@ -1026,140 +1246,6 @@ ______________________________ Yubico YubiKey PIV ______________________________
                                         never  :  Never                         
                                                                                 
                                       (default: 'default')                      
-
-================================================================================
-===============================     EXAMPLES     ===============================
-================================================================================
-
-_______________________________ Initialize token _______________________________
-
-export pin="1111"
-export puk="123456"
-export sopin="123456"
-export sopuk="123456"
-export password="secret"
-export mgmtkey="010203040506070801020304050607080102030405060708"
-
-
-***** OpenSC PKCS#11 ('-T opensc-p11') *****
-./sc.sh -T opensc-p11 --initialize --label mytoken --pin env:pin --so-pin env:sopin
-
-
-***** OpenSC PKCS#15 ('-T opensc-p15') *****
-# Step 1 - Erase PKCS#15 structure (certain models only)
-  ./sc.sh -T opensc-p15 --erase-card
-
-# Step 2 - Initialize token (all models)
-# Token supports a separate SO-PIN/SO-PUK pair
-  ./sc.sh -T opensc-p15 --initialize --pin env:pin --puk env:puk --so-pin env:sopin --so-puk env:sopuk
-# Token only supports one PIN/PUK pair
-  ./sc.sh -T opensc-p15 --initialize --opensc-p15-profile pkcs15+onepin --pin env:pin --puk env:puk
-
-# Step 3 - Finish initialization (certain models only)
-  ./sc.sh -T opensc-p15 --finalize
-
-
-***** SmartCard-HSM / Nitrokey HSM 2 ('-T schsm') *****
-# Initialize without any DKEK (= key backup/restore disabled)
-./sc.sh -T schsm --initialize --pin env:pin --so-pin env:sopin
-
-# Initialize with 1 DKEK share, with a single password (no threshold scheme)
-./sc.sh -T schsm --initialize --pin env:pin --so-pin env:sopin --schsm-dkek-shares 1
-./sc.sh -T schsm --schsm-dkek-share-create dkek-share-1.pbe --password env:password
-./sc.sh -T schsm --schsm-dkek-share-import dkek-share-1.pbe
-
-# Initialize with 1 DKEK share and a 2-of-4 threshold scheme
-./sc.sh -T schsm --initialize --pin env:pin --so-pin env:sopin --schsm-dkek-shares 1
-./sc.sh -T schsm --schsm-dkek-share-create dkek-share-1.pbe --schsm-pwd-shares-threshold 2 --schsm-pwd-shares-total 4
-./sc.sh -T schsm --schsm-dkek-share-import dkek-share-1.pbe --schsm-pwd-shares-total 2
-
-
-***** Yubico YubiKey PIV ('-T yubico') *****
-./sc.sh -T yubico --initialize --pin env:pin --puk env:puk --yubico-management-key env:mgmtkey
-
-_______________________ Generate public-private key pair _______________________
-
-***** OpenSC PKCS#11 ('-T opensc-p11') *****
-***** SmartCard-HSM / Nitrokey HSM 2 ('-T schsm') *****
-./sc.sh -T <...> --keypairgen --id 10 --key-type rsa:2048
-./sc.sh -T <...> --keypairgen --label mykey --key-type rsa:2048
-
-***** OpenSC PKCS#15 ('-T opensc-p15') *****
-./sc.sh -T opensc-p15 --keypairgen --id 10 --key-type rsa/2048
-./sc.sh -T opensc-p15 --keypairgen --label mykey --key-type rsa/2048
-
-***** Yubico YubiKey PIV ('-T yubico') *****
-./sc.sh -T yubico --keypairgen "pubkey.pem" --format pem --piv-slot 9A --key-type RSA2048
-
-____________________ Import certificate / key / data object ____________________
-
-***** OpenSC PKCS#11 ('-T opensc-p11') *****
-***** SmartCard-HSM / Nitrokey HSM 2 ('-T schsm') *****
-./sc.sh -T <...>  --import cert.der   --type cert     --id 10   --label mycert
-./sc.sh -T <...>  --import key.der    --type privkey  --id 20   --label mykey
-./sc.sh -T <...>  --import data.file  --type data     --id 30   --label mydata
-
-***** OpenSC PKCS#15 ('-T opensc-p15') *****
-./sc.sh -T opensc-p15   --import cert.pem   --type cert     --id 10   --label mycert
-./sc.sh -T opensc-p15   --import cert.der   --type cert     --id 10   --label mycert  --format der
-./sc.sh -T opensc-p15   --import key.pem    --type privkey  --id 20   --label mykey
-./sc.sh -T opensc-p15   --import key.p12    --type privkey  --id 20   --label mykey   --format pkcs12
-./sc.sh -T opensc-p15   --import data.file  --type data               --label mydata
-
-***** Yubico YubiKey PIV ('-T yubico') *****
-./sc.sh -T yubico   --import cert.pem   --type cert     --piv-slot 9A   --format pem
-./sc.sh -T yubico   --import key.der    --type privkey  --piv-slot 9A   --format der
-./sc.sh -T yubico   --import data.file  --type data     --piv-id 5FC108
-
-_______________________ Export certificate / data object _______________________
-
-***** OpenSC PKCS#11 ('-T opensc-p11') *****
-***** SmartCard-HSM / Nitrokey HSM 2 ('-T schsm') *****
-./sc.sh -T <...>    --export cert.der   --type cert   ( --id 10 | --label mycert )
-./sc.sh -T <...>    --export data.file  --type data   --label mydata
-
-***** OpenSC PKCS#15 ('-T opensc-p15') *****
-./sc.sh -T opensc-p15   --export cert.der   --type cert   --id 10
-./sc.sh -T opensc-p15   --export data.file  --type data   --label mydata
-
-***** Yubico YubiKey PIV ('-T yubico') *****
-./sc.sh -T yubico   --export cert.der   --type cert   --piv-slot 9A   --format der
-./sc.sh -T yubico   --export cert.pem   --type cert   --piv-slot 9A   --format pem
-./sc.sh -T yubico   --export data.file  --type data   --piv-id 5FC108
-
-____________________ Delete certificate / key / data object ____________________
-
-***** OpenSC PKCS#11 ('-T opensc-p11') *****
-***** SmartCard-HSM / Nitrokey HSM 2 ('-T schsm') *****
-./sc.sh -T <...>  --delete  --type cert     ( --id 10 | --label mycert )
-./sc.sh -T <...>  --delete  --type privkey  ( --id 20 | --label mykey )
-./sc.sh -T <...>  --delete  --type data     --label mydata  --data-application-name <name>
-./sc.sh -T <...>  --delete  --type data     --data-oid <oid>
-
-***** OpenSC PKCS#15 ('-T opensc-p15') *****
-./sc.sh -T opensc-p15   --delete  --type cert     --id 10
-./sc.sh -T opensc-p15   --delete  --type privkey  --id 20
-./sc.sh -T opensc-p15   --delete  --type data     --label mydata  --data-application-name <name>
-./sc.sh -T opensc-p15   --delete  --type data     --data-oid <oid>
-
-***** Yubico YubiKey PIV ('-T yubico') *****
-./sc.sh -T yubico --delete --type cert --piv-slot 9A
-
-____________________ PIN Management (Change/Reset/Unblock) _____________________
-
-export oldpin="1111"
-export newpin="2222"
-export puk="123456"
-export sopin="123456"
-
-./sc.sh -T <...> --change-pin  --pin env:oldpin    --new-pin env:newpin
-./sc.sh -T <...> --reset-pin   --so-pin env:sopin  --new-pin env:newpin
-./sc.sh -T <...> --unblock-pin --puk env:puk       --new-pin env:newpin
-
-_____ Backup and restore private key (SmartCard-HSM / Nitrokey HSM 2 only) _____
-
-./sc.sh -T schsm  --schsm-backup  wrap-key.bin  --schsm-key-reference 1
-./sc.sh -T schsm  --schsm-restore wrap-key.bin  --schsm-key-reference 10
 
 ================================================================================
 ================================     NOTES     =================================
